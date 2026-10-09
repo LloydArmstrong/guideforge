@@ -1,0 +1,418 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-09T12:05:00Z",
+  "title": "Design System: GuideForge",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "primary",
+        "displayName": "Ink",
+        "canonical": "oklch(22.3% 0.002 68)",
+        "tonalRamp": [
+          "oklch(15% 0.002 68)",
+          "oklch(26% 0.002 68)",
+          "oklch(38% 0.002 68)",
+          "oklch(49% 0.002 68)",
+          "oklch(61% 0.002 68)",
+          "oklch(72% 0.002 68)",
+          "oklch(84% 0.002 68)",
+          "oklch(95% 0.002 68)"
+        ]
+      },
+      "ink-hover": {
+        "role": "primary",
+        "displayName": "Ink, pressed lighter",
+        "canonical": "oklch(34.6% 0.006 78)",
+        "tonalRamp": [
+          "oklch(15% 0.006 78)",
+          "oklch(26% 0.006 78)",
+          "oklch(38% 0.006 78)",
+          "oklch(49% 0.006 78)",
+          "oklch(61% 0.006 78)",
+          "oklch(72% 0.006 78)",
+          "oklch(84% 0.006 78)",
+          "oklch(95% 0.006 78)"
+        ]
+      },
+      "red": {
+        "role": "secondary",
+        "displayName": "Stop-Press Red",
+        "canonical": "oklch(53.0% 0.197 29)",
+        "tonalRamp": [
+          "oklch(15% 0.197 29)",
+          "oklch(26% 0.197 29)",
+          "oklch(38% 0.197 29)",
+          "oklch(49% 0.197 29)",
+          "oklch(61% 0.197 29)",
+          "oklch(72% 0.197 29)",
+          "oklch(84% 0.197 29)",
+          "oklch(95% 0.197 29)"
+        ]
+      },
+      "moving": {
+        "role": "secondary",
+        "displayName": "Moving",
+        "canonical": "color-mix(in srgb, #C4221A 22%, #EFEDE6)",
+        "tonalRamp": [
+          "oklch(15% 0.045 30)",
+          "oklch(26% 0.045 30)",
+          "oklch(38% 0.045 30)",
+          "oklch(49% 0.045 30)",
+          "oklch(61% 0.045 30)",
+          "oklch(72% 0.045 30)",
+          "oklch(84% 0.045 30)",
+          "oklch(95% 0.045 30)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Newsprint",
+        "canonical": "oklch(94.6% 0.010 94)",
+        "tonalRamp": [
+          "oklch(15% 0.010 94)",
+          "oklch(26% 0.010 94)",
+          "oklch(38% 0.010 94)",
+          "oklch(49% 0.010 94)",
+          "oklch(61% 0.010 94)",
+          "oklch(72% 0.010 94)",
+          "oklch(84% 0.010 94)",
+          "oklch(95% 0.010 94)"
+        ]
+      },
+      "paper-lit": {
+        "role": "neutral",
+        "displayName": "Lit Paper",
+        "canonical": "oklch(97.0% 0.008 91)",
+        "tonalRamp": [
+          "oklch(15% 0.008 91)",
+          "oklch(26% 0.008 91)",
+          "oklch(38% 0.008 91)",
+          "oklch(49% 0.008 91)",
+          "oklch(61% 0.008 91)",
+          "oklch(72% 0.008 91)",
+          "oklch(84% 0.008 91)",
+          "oklch(95% 0.008 91)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "canonical": "oklch(100.0% 0.000 90)",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(26% 0.000 90)",
+          "oklch(38% 0.000 90)",
+          "oklch(49% 0.000 90)",
+          "oklch(61% 0.000 90)",
+          "oklch(72% 0.000 90)",
+          "oklch(84% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "canonical": "oklch(44.7% 0.010 85)",
+        "tonalRamp": [
+          "oklch(15% 0.010 85)",
+          "oklch(26% 0.010 85)",
+          "oklch(38% 0.010 85)",
+          "oklch(49% 0.010 85)",
+          "oklch(61% 0.010 85)",
+          "oklch(72% 0.010 85)",
+          "oklch(84% 0.010 85)",
+          "oklch(95% 0.010 85)"
+        ]
+      },
+      "blank": {
+        "role": "neutral",
+        "displayName": "Blank Line",
+        "canonical": "oklch(60.7% 0.012 90)",
+        "tonalRamp": [
+          "oklch(15% 0.012 90)",
+          "oklch(26% 0.012 90)",
+          "oklch(38% 0.012 90)",
+          "oklch(49% 0.012 90)",
+          "oklch(61% 0.012 90)",
+          "oklch(72% 0.012 90)",
+          "oklch(84% 0.012 90)",
+          "oklch(95% 0.012 90)"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(80.5% 0.015 89)",
+        "tonalRamp": [
+          "oklch(15% 0.015 89)",
+          "oklch(26% 0.015 89)",
+          "oklch(38% 0.015 89)",
+          "oklch(49% 0.015 89)",
+          "oklch(61% 0.015 89)",
+          "oklch(72% 0.015 89)",
+          "oklch(84% 0.015 89)",
+          "oklch(95% 0.015 89)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The GuideForge wordmark in the masthead. Uppercase; 2rem at 1000px and below."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "The title of a view. Uppercase."
+      },
+      "section": {
+        "displayName": "Section",
+        "purpose": "The section head above each run of a group in the line-up. Uppercase."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Minor heads: Groups, a viewer's name, Sync record, empty states. Uppercase."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "The position number in a reversed number box."
+      },
+      "name": {
+        "displayName": "Name",
+        "purpose": "Channel display names; in uppercase, the view names on the edition line."
+      },
+      "control": {
+        "displayName": "Control",
+        "purpose": "Button labels, sentence case."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Column headings over the line-up. Uppercase."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Everything read at length; tabular figures. Notes capped at 68ch."
+      },
+      "small": {
+        "displayName": "Small",
+        "purpose": "Channel IDs and help text under form fields."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Copy-exact tokens only: viewer guide addresses and inline code."
+      }
+    },
+    "shadows": [
+      {
+        "name": "cell-hover-line",
+        "value": "inset 0 -1px #85827A",
+        "purpose": "Not depth: a drawn line under a hovered cell in a listing row."
+      },
+      {
+        "name": "cell-edited-line",
+        "value": "inset 0 -2px currentColor",
+        "purpose": "Not depth: the underline marking a value that overrides upstream."
+      }
+    ],
+    "motion": [
+      {
+        "name": "out",
+        "value": "cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "The one easing curve (--out), used by both movements."
+      },
+      {
+        "name": "row-displacement",
+        "value": "150ms cubic-bezier(.16, 1, .3, 1)",
+        "purpose": "Neighbouring rows sliding aside while a row is dragged. 0ms under reduced motion."
+      },
+      {
+        "name": "fresh-ink",
+        "value": "0.9s cubic-bezier(.16, 1, .3, 1), from background #1C1B1A and color #EFEDE6",
+        "purpose": "One flash on the edition line when a new edition is published. Off under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "narrow",
+        "value": "1000px"
+      },
+      {
+        "name": "page-max",
+        "value": "1680px"
+      }
+    ],
+    "focus": {
+      "value": "2px solid #1C1B1A, offset 2px (offset -2px inside a listing row)",
+      "purpose": "Every control, on :focus-visible."
+    },
+    "rules": [
+      {
+        "name": "masthead",
+        "value": "4px solid #1C1B1A"
+      },
+      {
+        "name": "section",
+        "value": "3px solid #1C1B1A"
+      },
+      {
+        "name": "band",
+        "value": "1px solid #1C1B1A"
+      },
+      {
+        "name": "hairline",
+        "value": "1px solid #C3BFB5"
+      },
+      {
+        "name": "blank",
+        "value": "1px solid #85827A"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Solid ink action: Sync now, Save, Add viewer. Never red.",
+      "html": "<button class=\"ds-btn ds-btn-primary\" type=\"button\">Sync now</button>",
+      "css": ".ds-btn { padding: 6px 14px; border: 1px solid var(--ink, #1C1B1A); border-radius: 0; background: none; color: var(--ink, #1C1B1A); font: 700 0.875rem/1.45 Archivo, 'Helvetica Neue', Arial, sans-serif; font-stretch: 75%; cursor: pointer; white-space: nowrap; } .ds-btn:hover { background: var(--ink, #1C1B1A); color: var(--paper, #EFEDE6); } .ds-btn:active { translate: 0 1px; } .ds-btn:focus-visible { outline: 2px solid var(--ink, #1C1B1A); outline-offset: 2px; } .ds-btn:disabled { border-style: dashed; border-color: var(--blank, #85827A); background: none; color: var(--ink-soft, #57544E); cursor: default; translate: none; } .ds-btn-primary { background: var(--ink, #1C1B1A); color: var(--paper, #EFEDE6); } .ds-btn-primary:hover { background: #3B3936; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Secondary action in a square ink outline; reverses to solid ink on hover. Dashed when disabled.",
+      "html": "<button class=\"ds-btn\" type=\"button\">Gather groups</button> <button class=\"ds-btn\" type=\"button\" disabled>Syncing</button>",
+      "css": ".ds-btn { padding: 6px 14px; border: 1px solid var(--ink, #1C1B1A); border-radius: 0; background: none; color: var(--ink, #1C1B1A); font: 700 0.875rem/1.45 Archivo, 'Helvetica Neue', Arial, sans-serif; font-stretch: 75%; cursor: pointer; white-space: nowrap; } .ds-btn:hover { background: var(--ink, #1C1B1A); color: var(--paper, #EFEDE6); } .ds-btn:active { translate: 0 1px; } .ds-btn:focus-visible { outline: 2px solid var(--ink, #1C1B1A); outline-offset: 2px; } .ds-btn:disabled { border-style: dashed; border-color: var(--blank, #85827A); background: none; color: var(--ink-soft, #57544E); cursor: default; translate: none; }"
+    },
+    {
+      "name": "Destructive Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Revoke only: red outline and text, filling red on hover, always behind a confirmation.",
+      "html": "<button class=\"ds-btn ds-btn-danger\" type=\"button\">Revoke</button>",
+      "css": ".ds-btn { padding: 6px 14px; border: 1px solid var(--ink, #1C1B1A); border-radius: 0; background: none; color: var(--ink, #1C1B1A); font: 700 0.875rem/1.45 Archivo, 'Helvetica Neue', Arial, sans-serif; font-stretch: 75%; cursor: pointer; white-space: nowrap; } .ds-btn:hover { background: var(--ink, #1C1B1A); color: var(--paper, #EFEDE6); } .ds-btn:active { translate: 0 1px; } .ds-btn:focus-visible { outline: 2px solid var(--ink, #1C1B1A); outline-offset: 2px; } .ds-btn:disabled { border-style: dashed; border-color: var(--blank, #85827A); background: none; color: var(--ink-soft, #57544E); cursor: default; translate: none; } .ds-btn-danger { border-color: var(--red, #C4221A); color: var(--red, #C4221A); } .ds-btn-danger:hover { background: var(--red, #C4221A); color: #fff; }"
+    },
+    {
+      "name": "Ruled Blank Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "A blank on the sheet: lit paper, one line beneath, no outline.",
+      "html": "<input class=\"ds-field\" type=\"search\" placeholder=\"Find a channel by name or ID\" aria-label=\"Find a channel by name or ID\" style=\"max-width:300px\">",
+      "css": ".ds-field { width: 100%; padding: 7px 8px; border: 0; border-bottom: 1px solid var(--blank, #85827A); border-radius: 0; background: var(--paper-lit, #F7F5EF); color: var(--ink, #1C1B1A); font: 400 0.875rem/1.45 Archivo, 'Helvetica Neue', Arial, sans-serif; caret-color: var(--red, #C4221A); } .ds-field:hover { border-bottom-color: var(--ink, #1C1B1A); } .ds-field::placeholder { color: var(--ink-soft, #57544E); opacity: 1; } .ds-field:focus-visible { outline: 2px solid var(--ink, #1C1B1A); outline-offset: 2px; }"
+    },
+    {
+      "name": "Viewer Address Line",
+      "kind": "input",
+      "refersTo": "field-address",
+      "description": "A read-only guide address in monospace with its copy action; the copy-exact exception to the one-grotesque rule.",
+      "html": "<div class=\"ds-addr\"><span class=\"ds-addr-via\">Local</span><input class=\"ds-field ds-field-mono\" type=\"text\" readonly value=\"http://127.0.0.1:8777/u/KEY/epg.xml.gz\" aria-label=\"Local guide address\"><button class=\"ds-btn\" type=\"button\">Copy for TiviMate</button></div>",
+      "css": ".ds-field { width: 100%; padding: 7px 8px; border: 0; border-bottom: 1px solid var(--blank, #85827A); border-radius: 0; background: var(--paper-lit, #F7F5EF); color: var(--ink, #1C1B1A); font: 400 0.875rem/1.45 Archivo, 'Helvetica Neue', Arial, sans-serif; caret-color: var(--red, #C4221A); } .ds-field:hover { border-bottom-color: var(--ink, #1C1B1A); } .ds-field::placeholder { color: var(--ink-soft, #57544E); opacity: 1; } .ds-field:focus-visible { outline: 2px solid var(--ink, #1C1B1A); outline-offset: 2px; } .ds-btn { padding: 6px 14px; border: 1px solid var(--ink, #1C1B1A); border-radius: 0; background: none; color: var(--ink, #1C1B1A); font: 700 0.875rem/1.45 Archivo, 'Helvetica Neue', Arial, sans-serif; font-stretch: 75%; cursor: pointer; white-space: nowrap; } .ds-btn:hover { background: var(--ink, #1C1B1A); color: var(--paper, #EFEDE6); } .ds-btn:active { translate: 0 1px; } .ds-btn:focus-visible { outline: 2px solid var(--ink, #1C1B1A); outline-offset: 2px; } .ds-btn:disabled { border-style: dashed; border-color: var(--blank, #85827A); background: none; color: var(--ink-soft, #57544E); cursor: default; translate: none; } .ds-addr { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 6px 0; border-top: 1px solid var(--rule, #C3BFB5); } .ds-addr-via { font: 400 0.875rem/1.45 Archivo, 'Helvetica Neue', Arial, sans-serif; color: var(--ink-soft, #57544E); } .ds-field-mono { font: 0.8125rem ui-monospace, 'SF Mono', Menlo, monospace; }"
+    },
+    {
+      "name": "Masthead and Edition Line",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Wordmark over a thick-and-thin rule, then view names, the edition sentence and Sync now. A red square marks the current view.",
+      "html": "<header class=\"ds-masthead\"><h1 class=\"ds-wordmark\">GuideForge</h1><p>Friday, 9 October 2026</p></header><div class=\"ds-edition\"><nav aria-label=\"Views\"><a href=\"#\" aria-current=\"page\">Line-up</a><a href=\"#\">Viewers</a><a href=\"#\">Source</a></nav><p class=\"ds-edition-line\">Published 11:57 · 2,249 channels · 247,390 programmes · 4.4 MB · next sync 17:56</p><button class=\"ds-btn ds-btn-primary\" type=\"button\">Sync now</button></div>",
+      "css": ".ds-btn { padding: 6px 14px; border: 1px solid var(--ink, #1C1B1A); border-radius: 0; background: none; color: var(--ink, #1C1B1A); font: 700 0.875rem/1.45 Archivo, 'Helvetica Neue', Arial, sans-serif; font-stretch: 75%; cursor: pointer; white-space: nowrap; } .ds-btn:hover { background: var(--ink, #1C1B1A); color: var(--paper, #EFEDE6); } .ds-btn:active { translate: 0 1px; } .ds-btn:focus-visible { outline: 2px solid var(--ink, #1C1B1A); outline-offset: 2px; } .ds-btn:disabled { border-style: dashed; border-color: var(--blank, #85827A); background: none; color: var(--ink-soft, #57544E); cursor: default; translate: none; } .ds-btn-primary { background: var(--ink, #1C1B1A); color: var(--paper, #EFEDE6); } .ds-btn-primary:hover { background: #3B3936; } .ds-masthead { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 22px 0 8px; border-bottom: 4px solid var(--ink, #1C1B1A); font: 400 0.875rem/1.45 Archivo, 'Helvetica Neue', Arial, sans-serif; color: var(--ink, #1C1B1A); } .ds-masthead p { margin: 0; } .ds-wordmark { margin: 0; font-size: 2.75rem; font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; font-stretch: 62%; font-weight: 800; text-transform: uppercase; letter-spacing: .01em; line-height: 1.05; color: var(--ink, #1C1B1A); } .ds-edition { display: flex; align-items: center; gap: 8px 28px; flex-wrap: wrap; margin-top: 3px; padding: 7px 0; border-block: 1px solid var(--ink, #1C1B1A); font: 400 0.875rem/1.45 Archivo, 'Helvetica Neue', Arial, sans-serif; font-variant-numeric: tabular-nums; color: var(--ink, #1C1B1A); } .ds-edition nav { display: flex; gap: 20px; } .ds-edition nav a { font-stretch: 75%; font-weight: 700; font-size: 1rem; text-transform: uppercase; text-decoration: none; text-underline-offset: 3px; color: inherit; padding: 2px 0; } .ds-edition nav a:hover { text-decoration: underline; } .ds-edition nav a:focus-visible { outline: 2px solid var(--ink, #1C1B1A); outline-offset: 2px; } .ds-edition nav a[aria-current]::before { content: ''; display: inline-block; width: .55em; height: .55em; margin-right: .4em; background: var(--red, #C4221A); } .ds-edition-line { flex: 1; min-width: 16ch; margin: 0; padding: 2px 6px; }"
+    },
+    {
+      "name": "Group Index",
+      "kind": "custom",
+      "refersTo": "row",
+      "description": "Every group with a whole-group tick and its enabled count; a red square marks the group being read.",
+      "html": "<div class=\"ds-groups\"><h2>Groups</h2><ul><li><span></span><button type=\"button\" aria-pressed=\"false\">All channels</button><span class=\"ds-fig\">2,249/2,500</span></li><li><input type=\"checkbox\" checked aria-label=\"Enable every channel in UK\"><button type=\"button\" aria-pressed=\"true\">UK</button><span class=\"ds-fig\">249/250</span></li><li><input type=\"checkbox\" aria-label=\"Enable every channel in SE\"><button type=\"button\" aria-pressed=\"false\">SE</button><span class=\"ds-fig\">0/250</span></li></ul></div>",
+      "css": ".ds-groups { width: 250px; font: 400 0.875rem/1.45 Archivo, 'Helvetica Neue', Arial, sans-serif; font-variant-numeric: tabular-nums; color: var(--ink, #1C1B1A); } .ds-groups h2 { margin: 0; font-size: 1.125rem; padding: 10px 0 6px; border-top: 3px solid var(--ink, #1C1B1A); font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; font-stretch: 62%; font-weight: 800; text-transform: uppercase; letter-spacing: .01em; line-height: 1.05; color: var(--ink, #1C1B1A); } .ds-groups ul { list-style: none; margin: 10px 0 0; padding: 0; } .ds-groups li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; border-top: 1px solid var(--rule, #C3BFB5); } .ds-groups li:first-child { border-top-color: var(--ink, #1C1B1A); font-weight: 650; } .ds-groups input { accent-color: var(--ink, #1C1B1A); width: 15px; height: 15px; margin: 0; cursor: pointer; } .ds-groups button { border: 0; border-radius: 0; background: none; padding: 6px 4px; font: inherit; color: inherit; text-align: left; cursor: pointer; } .ds-groups button:hover { text-decoration: underline; text-underline-offset: 3px; } .ds-groups button:focus-visible { outline: 2px solid var(--ink, #1C1B1A); outline-offset: 2px; } .ds-groups button[aria-pressed=true] { font-weight: 800; } .ds-groups button[aria-pressed=true]::before { content: ''; display: inline-block; width: .5em; height: .5em; margin-right: .45em; background: var(--red, #C4221A); } .ds-fig { color: var(--ink-soft, #57544E); padding-left: 8px; }"
+    },
+    {
+      "name": "Listing Row with Section Head",
+      "kind": "custom",
+      "refersTo": "number-box",
+      "description": "The signature component: a section head, then rows led by a reversed number box. Shows an overridden name, a disabled channel and one gone from upstream.",
+      "html": "<div class=\"ds-sheet\"><div class=\"ds-run\"><span>UK</span><span class=\"ds-run-count\">2 channels</span></div><div class=\"ds-row\"><button class=\"ds-handle\" type=\"button\" aria-label=\"Move this channel\"></button><input class=\"ds-pos\" type=\"text\" inputmode=\"numeric\" value=\"1\" aria-label=\"Position in the guide\"><input class=\"ds-on\" type=\"checkbox\" checked aria-label=\"Enabled\"><input class=\"ds-cell ds-cell-name ds-edited\" type=\"text\" value=\"BBC One\" aria-label=\"Display name\"><input class=\"ds-cell\" type=\"text\" value=\"101\" aria-label=\"Channel number (LCN)\"><span class=\"ds-cell ds-cid\">KinoOne1.uk</span></div><div class=\"ds-row ds-off\"><button class=\"ds-handle\" type=\"button\" aria-label=\"Move this channel\"></button><input class=\"ds-pos\" type=\"text\" inputmode=\"numeric\" value=\"2\" aria-label=\"Position in the guide\"><input class=\"ds-on\" type=\"checkbox\" aria-label=\"Enabled\"><input class=\"ds-cell ds-cell-name\" type=\"text\" value=\"UK: Horizon One HD\" aria-label=\"Display name\"><input class=\"ds-cell\" type=\"text\" value=\"\" aria-label=\"Channel number (LCN)\"><span class=\"ds-cell ds-cid\">HorizonOne2.uk<span class=\"ds-gone\"> · not in upstream</span></span></div></div>",
+      "css": ".ds-sheet { font: 400 0.875rem/1.45 Archivo, 'Helvetica Neue', Arial, sans-serif; font-variant-numeric: tabular-nums; color: var(--ink, #1C1B1A); } .ds-run { display: flex; justify-content: space-between; align-items: flex-end; padding: 7px 0 5px; border-top: 3px solid var(--ink, #1C1B1A); } .ds-run > :first-child { font-size: 1.375rem; font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; font-stretch: 62%; font-weight: 800; text-transform: uppercase; letter-spacing: .01em; line-height: 1.05; color: var(--ink, #1C1B1A); } .ds-run-count { color: var(--ink-soft, #57544E); } .ds-row { display: grid; grid-template-columns: 22px 54px 30px minmax(150px, 1.5fr) 70px minmax(110px, 1fr); align-items: stretch; min-height: 36px; border-top: 1px solid var(--rule, #C3BFB5); } .ds-row:hover, .ds-row:focus-within { background: var(--paper-lit, #F7F5EF); } .ds-row input, .ds-row button { font: inherit; color: inherit; border-radius: 0; min-width: 0; } .ds-row :focus-visible { outline: 2px solid var(--ink, #1C1B1A); outline-offset: 2px; } .ds-handle { border: 0; cursor: grab; touch-action: none; background: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='14' fill='%2357544E'%3E%3Ccircle cx='1.5' cy='1.5' r='1.5'/%3E%3Ccircle cx='6.5' cy='1.5' r='1.5'/%3E%3Ccircle cx='1.5' cy='7' r='1.5'/%3E%3Ccircle cx='6.5' cy='7' r='1.5'/%3E%3Ccircle cx='1.5' cy='12.5' r='1.5'/%3E%3Ccircle cx='6.5' cy='12.5' r='1.5'/%3E%3C/svg%3E\") center / 8px 14px no-repeat; } .ds-handle:active { cursor: grabbing; } .ds-row .ds-pos { margin: 2px 0; padding: 0 2px; border: 1px solid var(--ink, #1C1B1A); background: var(--ink, #1C1B1A); color: var(--paper, #EFEDE6); text-align: center; font-stretch: 62%; font-weight: 800; font-size: 1.0625rem; } .ds-row .ds-pos:hover, .ds-row .ds-pos:focus-visible { background: var(--paper-lit, #F7F5EF); color: var(--ink, #1C1B1A); } .ds-on { place-self: center; accent-color: var(--ink, #1C1B1A); width: 15px; height: 15px; margin: 0; cursor: pointer; } .ds-cell { border: 0; border-left: 1px solid var(--rule, #C3BFB5); padding: 0 8px; background: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } input.ds-cell:hover { box-shadow: inset 0 -1px var(--blank, #85827A); } input.ds-cell:focus-visible { outline-offset: -2px; background: #fff; } .ds-row .ds-cell-name { font-stretch: 75%; font-weight: 700; font-size: 1rem; } input.ds-cell.ds-edited, input.ds-cell.ds-edited:hover { box-shadow: inset 0 -2px currentColor; } .ds-cid { color: var(--ink-soft, #57544E); font-size: 0.8125rem; line-height: 35px; } .ds-gone { color: var(--red, #C4221A); } .ds-off { color: var(--ink-soft, #57544E); } .ds-row.ds-off .ds-pos { background: none; color: var(--ink-soft, #57544E); border-color: var(--blank, #85827A); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Listings Page",
+    "overview": "GuideForge's editor is set like the printed weekly TV listings spread it produces. A masthead in compressed heavy capitals sits over a thick-and-thin rule; one edition line under it says whether what players download matches the page; the line-up below is the page itself, each channel led by a reversed ink number box, with a bold section head printed wherever the group changes. It is a working sheet for one operator at a desk on a big screen in daylight, and it is light only: there is no dark theme.\n\nThe material is newsprint and ink. A grey paper ground, soft-black ink, hairline rules, and a single spot red. Everything is flat and square. Structure is carried by rule weight and by one typeface's width axis, never by boxes, cards, tints or depth. Density is high because thousands of rows are normal: a row is 36px tall and the list gets the width. The system refuses the home-lab dashboard: no sidebar of icons, no status cards, no dark slate.\n\nAlmost nothing moves. Rows slide out of the way while one is dragged, and the edition line flashes once in fresh ink when a new edition is published.",
+    "keyCharacteristics": [
+      "Newsprint ground, soft-black ink, hairline rules, one spot red.",
+      "One grotesque, Archivo, with its width axis doing the hierarchy.",
+      "Flat ink, square corners, no shadows as depth, no texture.",
+      "Fields are ruled blanks on the sheet, not boxes.",
+      "Section heads re-set on every reorder and show exactly where a group is split.",
+      "Dense, ruled, tabular; the line-up is the page.",
+      "Light only. Two authored movements and nothing else."
+    ],
+    "rules": [
+      {
+        "name": "The Stop Press Rule",
+        "body": "Red means in motion, wrong, or current, and nothing else. If an element is none of those three, it is ink. Red is never decoration, never a brand flourish, and there is no second accent.",
+        "section": "colors"
+      },
+      {
+        "name": "The Solid Ink Rule",
+        "body": "Primary actions are solid ink with paper text. A primary action is never red; the only red button is the destructive one, and it is an outline until hovered.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Grotesque Rule",
+        "body": "Everything is Archivo. Hierarchy comes from the width axis and weight, not from a second family: 62% and 800 for heads and figures, 75% and 700 for names, controls and labels, normal width for reading.",
+        "section": "typography"
+      },
+      {
+        "name": "The Copy-Exact Exception",
+        "body": "Monospace appears only on strings the operator copies character for character: viewer guide addresses and inline code. It is never a style choice.",
+        "section": "typography"
+      },
+      {
+        "name": "The Running Head Rule",
+        "body": "A section head is printed wherever the group changes between two consecutive visible rows, with that run's channel count at its right. A group split in two therefore reads as two sections, which is how the operator finds drift. When the groups are scattered (more runs than three times the number of groups) no heads are printed at all, the count line says so, and Gather groups is offered.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Ink Rule",
+        "body": "No shadow is ever used as depth. The shadow property appears only as an inset line: 1px of Blank Line under a hovered cell, 2px of the text colour under an overridden cell. Likewise the gradient function is used only to lay a flat fill or a ruled blank sheet, never a visible blend. No texture, grain, or paper effect.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Ruled Blank Rule",
+        "body": "A field is a blank on the sheet: lit paper with a single line beneath it and no outline. In a listing row the blank loses even that, and is just a cell between hairlines until hovered. Never draw a box around an input.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Rule Weight Rule",
+        "body": "Heavier rule, bigger division: 4px for the page, 3px for a section, 1px ink for a band, 1px hairline for a row. A new division picks one of these; it does not invent a weight.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Two Movements Rule",
+        "body": "Only two things animate: rows displacing during a drag (150ms ease-out) and the fresh-ink flash on the edition line when a new edition is published (0.9s, once). Reduced motion turns both off. Hover, focus, view changes and state changes are instant.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do set every head in Archivo at 62% width, weight 800, uppercase, and pick its size from the four that exist: 2.75rem, 1.5rem, 1.375rem, 1.125rem.",
+      "Do keep red for things in motion, wrong, or current, at #C4221A so red text holds about 5:1 on the paper.",
+      "Do make primary actions solid ink with paper text.",
+      "Do build fields as ruled blanks: lit paper, one line beneath, no outline.",
+      "Do divide with rules from the existing weights (4px, 3px and 1px ink, 1px hairline) and keep every corner square.",
+      "Do keep figures tabular and keep secondary text at Soft Ink or darker.",
+      "Do print a section head wherever the group changes, and print none when the groups are scattered.",
+      "Do keep reordering possible from the keyboard and by typing a position, and keep the 2px ink focus outline on every control.",
+      "Do keep the line-up a table at every width; let it scroll sideways below 1000px."
+    ],
+    "donts": [
+      "Don't use red for a primary action, a heading, a link, or emphasis. Don't add a second accent colour.",
+      "Don't add a dark theme. The system is light only by decision.",
+      "Don't use a shadow for depth, round a corner, or add texture, grain or a visible gradient.",
+      "Don't draw a box around an input or wrap content in a card.",
+      "Don't bring in a second typeface. Monospace is for viewer guide addresses and inline code only.",
+      "Don't build the home-lab dashboard: no sidebar of icons, no status cards, no dark slate.",
+      "Don't animate anything beyond the drag displacement and the fresh-ink flash.",
+      "Don't set text in Blank Line or Hairline; they are for lines.",
+      "Don't use white as a surface. It is the cell being typed in and the text on a hovered Revoke, and nothing more."
+    ]
+  }
+}

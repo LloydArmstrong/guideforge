@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          "app/static/index.html"
+        ],
+        "createdAt": "2026-10-09T09:51:05.658Z",
+        "reason": "user confirmed: on the direction decision page the owner chose The Listings Page card, whose palette lists the newsprint ground #EFEDE6 and whose risk line named the familiarity of newsprint plus spot red"
+      }
+    ]
+  }
+}
