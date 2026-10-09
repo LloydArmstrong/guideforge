@@ -1,0 +1,46 @@
+services:
+  guideforge:
+    build: .
+    restart: unless-stopped
+    environment:
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD in .env}
+      UPSTREAM_URL: ${UPSTREAM_URL:-}
+      SYNC_SCHEDULE: ${SYNC_SCHEDULE:-6}
+      PUBLIC_URL: ${PUBLIC_URL:-}
+      TZ: ${TZ:-UTC}
+      R2_ENDPOINT: ${R2_ENDPOINT:-}
+      R2_BUCKET: ${R2_BUCKET:-}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID:-}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY:-}
+      R2_PUBLIC_URL: ${R2_PUBLIC_URL:-}
+    volumes:
+      - guideforge-data:/data
+    ports:
+      - "8000:8000" # editor + feeds on the LAN
+
+  # Optional: docker compose --profile nginx up -d
+  # Publishes only the feed paths; the editor stays on the LAN port above.
+  nginx:
+    profiles: [nginx]
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+    depends_on: [guideforge]
+
+  # Optional: docker compose --profile tunnel up -d
+  # In the Cloudflare dashboard point the tunnel's public hostname at
+  # http://nginx:80 (feeds only, run both profiles) or http://guideforge:8000 (feeds + editor).
+  cloudflared:
+    profiles: [tunnel]
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on: [guideforge]
+
+volumes:
+  guideforge-data:

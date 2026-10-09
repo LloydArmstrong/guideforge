@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GuideForge</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%231C1B1A'/%3E%3Cpath d='M4 4h8v2H6v4h4V9H8V7h4v5H4z' fill='%23EFEDE6'/%3E%3C/svg%3E">
+<style>
+  @font-face { font-family: Archivo; src: url(/static/archivo-latin.woff2) format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; font-display: swap;
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: Archivo; src: url(/static/archivo-latin-ext.woff2) format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; font-display: swap;
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+  :root {
+    color-scheme: light;
+    --paper: #EFEDE6;       /* newsprint */
+    --paper-lit: #F7F5EF;   /* a field or row under the hand */
+    --ink: #1C1B1A;
+    --ink-soft: #57544E;    /* secondary text, 6.4:1 on paper */
+    --rule: #C3BFB5;        /* hairlines */
+    --blank: #85827A;       /* the line under a field, 3.3:1 */
+    --red: #C4221A;         /* the one spot colour: in motion, wrong, or current */
+    --moving: color-mix(in srgb, var(--red) 22%, var(--paper));  /* the row being dragged */
+    --out: cubic-bezier(.16, 1, .3, 1);
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  ::selection { background: var(--ink); color: var(--paper); }
+  html { scrollbar-color: var(--blank) var(--paper); }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 0.875rem/1.45 Archivo, "Helvetica Neue", Arial, sans-serif; caret-color: var(--red); font-variant-numeric: tabular-nums; }
+  main { max-width: 1680px; margin: 0 auto; padding: 0 28px 64px; }
+  button, input { font: inherit; color: inherit; border-radius: 0; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  a { color: inherit; text-underline-offset: 3px; }
+  code { font: 0.8125rem ui-monospace, "SF Mono", Menlo, monospace; }
+  p { margin: 0; }
+
+  /* the listings page's one display voice: Archivo at its narrowest and heaviest */
+  .head { margin: 0; font-stretch: 62%; font-weight: 800; text-transform: uppercase; letter-spacing: .01em; line-height: 1.05; }
+  .note { color: var(--ink-soft); max-width: 68ch; }
+  .stop { color: var(--red); font-weight: 650; }
+
+  .masthead { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding: 22px 0 8px; border-bottom: 4px solid var(--ink); }
+  .masthead h1 { font-size: 2.75rem; }
+  .edition { display: flex; align-items: center; gap: 8px 28px; flex-wrap: wrap; margin-top: 3px; padding: 7px 0; border-block: 1px solid var(--ink); }
+  .edition nav { display: flex; gap: 20px; }
+  .edition nav a { font-stretch: 75%; font-weight: 700; font-size: 1rem; text-transform: uppercase; text-decoration: none; padding: 2px 0; }
+  .edition nav a:hover { text-decoration: underline; }
+  .edition nav a[aria-current]::before { content: ""; display: inline-block; width: .55em; height: .55em; margin-right: .4em; background: var(--red); }
+  #edition { flex: 1; min-width: 16ch; padding: 2px 6px; }
+  #edition.fresh { animation: fresh-ink .9s var(--out); }
+  @keyframes fresh-ink { from { background: var(--ink); color: var(--paper); } }
+  #alert { display: flex; gap: 16px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--red); }
+  #alert span { flex: 1; }
+
+  .btn { padding: 6px 14px; border: 1px solid var(--ink); background: none; font-stretch: 75%; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .btn:hover { background: var(--ink); color: var(--paper); }
+  .btn:active { translate: 0 1px; }
+  .btn.primary { background: var(--ink); color: var(--paper); }
+  .btn.primary:hover { background: #3B3936; }
+  .btn.danger { border-color: var(--red); color: var(--red); }
+  .btn.danger:hover { background: var(--red); color: #fff; }
+  .btn:disabled { border-style: dashed; border-color: var(--blank); background: none; color: var(--ink-soft); cursor: default; translate: none; }
+  input[type=checkbox] { accent-color: var(--ink); width: 15px; height: 15px; margin: 0; cursor: pointer; }
+  .field { width: 100%; padding: 7px 8px; border: 0; border-bottom: 1px solid var(--blank); background: var(--paper-lit); }
+  .field:hover { border-bottom-color: var(--ink); }
+  .field::placeholder, #q::placeholder { color: var(--ink-soft); opacity: 1; }
+
+  .view { padding-top: 26px; }
+  .view > h2 { font-size: 1.5rem; margin-bottom: 6px; }
+
+  /* ---- line-up ---- */
+  .lineup { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 0 32px; align-items: start; }
+  .groups { position: sticky; top: 0; max-height: 100vh; overflow-y: auto; padding: 0 12px 24px 0; scrollbar-width: thin; }
+  .groups h2 { font-size: 1.125rem; padding: 10px 0 6px; border-top: 3px solid var(--ink); }
+  .groups ul { list-style: none; margin: 10px 0 0; padding: 0; }
+  .groups li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; border-top: 1px solid var(--rule); }
+  .groups li:first-child { border-top-color: var(--ink); font-weight: 650; }
+  .groups button { border: 0; background: none; padding: 6px 4px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+  .groups button:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .groups button[aria-pressed=true] { font-weight: 800; }
+  .groups button[aria-pressed=true]::before { content: ""; display: inline-block; width: .5em; height: .5em; margin-right: .45em; background: var(--red); }
+  .groups .fig { color: var(--ink-soft); padding-left: 8px; }
+
+  .tools { display: flex; align-items: center; gap: 10px 20px; flex-wrap: wrap; padding: 0 0 10px; }
+  .tools .btn { margin-left: auto; }
+  .tools .how { flex: 1 1 0; min-width: 260px; max-width: none; }  /* wraps in place instead of pushing the button down */
+  #q { width: 300px; max-width: 100%; }
+  .row { display: grid; grid-template-columns: 22px 54px 30px 40px minmax(150px, 1.5fr) 70px minmax(110px, 1fr) minmax(140px, 1.2fr) 120px; align-items: stretch; min-height: 36px; border-top: 1px solid var(--rule); }
+  .row > * { min-width: 0; }
+  .cols { position: sticky; top: 0; z-index: 2; min-height: 0; background: var(--paper); border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink); font-stretch: 75%; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; }
+  .cols span { padding: 6px 8px 5px; }
+  #list { list-style: none; margin: 0; padding: 0; }
+  /* off-screen rows skip rendering, which keeps a guide of thousands of channels quick */
+  #list .row { content-visibility: auto; contain-intrinsic-size: auto 37px; }
+  #list .row:hover, #list .row:focus-within { background: linear-gradient(var(--paper-lit), var(--paper-lit)) bottom / 100% 36px no-repeat; }
+  #list .row.ghost { background: linear-gradient(var(--moving), var(--moving)) bottom / 100% 36px no-repeat; }
+  /* a section head is printed wherever the group changes, so a group split in two reads as two sections */
+  .row.run::before { content: attr(data-run); grid-row: 1; grid-column: 1 / -1; margin-top: 18px; padding: 7px 0 5px; border-top: 3px solid var(--ink); color: var(--ink);
+    font-stretch: 62%; font-weight: 800; font-size: 1.375rem; line-height: 1.05; text-transform: uppercase; letter-spacing: .01em; }
+  .row.run::after { content: attr(data-count); grid-row: 1; grid-column: 1 / -1; place-self: end; padding-bottom: 6px; color: var(--ink-soft); }
+  #list .row.run:first-child::before, #list .row.run.lead::before { margin-top: 0; border-top: 0; }
+  /* a line-up with its groups scattered would print a head on every row, so it prints none until gathered */
+  #list.scattered .row.run::before, #list.scattered .row.run::after { content: none; }
+  .handle { border: 0; cursor: grab; touch-action: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='14' fill='%2357544E'%3E%3Ccircle cx='1.5' cy='1.5' r='1.5'/%3E%3Ccircle cx='6.5' cy='1.5' r='1.5'/%3E%3Ccircle cx='1.5' cy='7' r='1.5'/%3E%3Ccircle cx='6.5' cy='7' r='1.5'/%3E%3Ccircle cx='1.5' cy='12.5' r='1.5'/%3E%3Ccircle cx='6.5' cy='12.5' r='1.5'/%3E%3C/svg%3E") center / 8px 14px no-repeat; }
+  .handle:active { cursor: grabbing; }
+  .pos { margin: 2px 0; padding: 0 2px; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); text-align: center; font-stretch: 62%; font-weight: 800; font-size: 1.0625rem; }
+  .pos:hover, .pos:focus-visible { background: var(--paper-lit); color: var(--ink); }
+  .on { place-self: center; }
+  .logo { align-self: center; height: 24px; padding: 0 3px; }
+  .logo img { width: 100%; height: 100%; object-fit: contain; }
+  .cell { border: 0; border-left: 1px solid var(--rule); padding: 0 8px; background: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  input.cell:hover { box-shadow: inset 0 -1px var(--blank); }
+  input.cell:focus-visible { outline-offset: -2px; background: #fff; }
+  .cell[data-f=name] { font-stretch: 75%; font-weight: 700; font-size: 1rem; }
+  .cell[data-f=icon], .cell[data-f=grp], .cid { color: var(--ink-soft); }
+  input.cell.edited, input.cell.edited:hover { box-shadow: inset 0 -2px currentColor; }
+  .cid { font-size: 0.8125rem; line-height: 35px; }
+  .row.off { color: var(--ink-soft); }
+  .row.off .pos { background: none; color: var(--ink-soft); border-color: var(--blank); }
+  .row.off .logo { filter: grayscale(1); opacity: .55; }
+  .row.gone .cid::after { content: " · not in upstream"; color: var(--red); }
+  .ruled { min-height: 444px; background: repeating-linear-gradient(to bottom, transparent 0 36px, var(--rule) 36px 37px); }
+  .blank { padding: 28px 0; max-width: 60ch; }
+  .blank h3 { font-size: 1.125rem; margin-bottom: 6px; }
+
+  /* ---- viewers, source ---- */
+  .viewer { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 8px 28px; margin-top: 22px; padding-top: 10px; border-top: 3px solid var(--ink); }
+  .viewer h3 { font-size: 1.125rem; overflow-wrap: anywhere; }
+  .viewer .who { display: grid; gap: 10px; justify-items: start; align-content: start; }
+  .addr { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 6px 0; border-top: 1px solid var(--rule); }
+  .addr:first-child { border-top: 0; padding-top: 0; }
+  .addr .field { font: 0.8125rem ui-monospace, "SF Mono", Menlo, monospace; }
+  .inline { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  #addUser { margin-top: 32px; padding-top: 12px; border-top: 1px solid var(--ink); }
+  #addUser .field { width: 340px; max-width: 100%; }
+  .source { display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 1fr); gap: 20px 56px; align-items: start; }
+  form.stack { display: grid; gap: 16px; }
+  form.stack label { display: grid; gap: 4px; font-weight: 650; }
+  form.stack label.check { display: flex; gap: 10px; align-items: center; font-weight: 400; }
+  form.stack small { font-weight: 400; font-size: 0.8125rem; color: var(--ink-soft); }
+  .record h3 { font-size: 1.125rem; padding: 10px 0 8px; border-top: 3px solid var(--ink); }
+  dl { margin: 0; }
+  dl div { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; padding: 6px 0; border-top: 1px solid var(--rule); }
+  dt { color: var(--ink-soft); }
+  dd { margin: 0; overflow-wrap: anywhere; }
+
+  @media (max-width: 1000px) {
+    main { padding: 0 16px 48px; }
+    .masthead h1 { font-size: 2rem; }
+    .lineup, .source, .viewer { grid-template-columns: minmax(0, 1fr); }
+    .groups { position: static; max-height: none; overflow: visible; margin-bottom: 20px; padding-right: 0; }
+    #edition { padding-inline: 0; }
+    .sheet { overflow-x: auto; }
+    .sheet > * { min-width: 866px; }
+    .row { grid-template-columns: 22px 54px 30px 40px 190px 70px 150px 190px 120px; }
+    .addr { grid-template-columns: 56px minmax(0, 1fr); }
+    .addr .btn { grid-column: 2; justify-self: start; }
+  }
+  @media (prefers-reduced-motion: reduce) { #edition.fresh { animation: none; } }
+</style>
+</head>
+<body>
+<main>
+  <header class="masthead">
+    <h1 class="head">GuideForge</h1>
+    <p id="dateline"></p>
+  </header>
+  <div class="edition">
+    <nav aria-label="Views">
+      <a href="#line-up">Line-up</a>
+      <a href="#viewers">Viewers</a>
+      <a href="#source">Source</a>
+    </nav>
+    <p id="edition" role="status">Reading the guide</p>
+    <button id="syncBtn" class="btn primary" type="button">Sync now</button>
+  </div>
+  <div id="alert" class="stop" role="alert" hidden><span></span><button class="btn" type="button">Dismiss</button></div>
+
+  <section id="view-line-up" class="view lineup" aria-label="Line-up">
+    <aside class="groups">
+      <h2 class="head">Groups</h2>
+      <p class="note">Tick a group to enable or disable every channel in it. Select its name to read only that group.</p>
+      <ul id="groups"></ul>
+    </aside>
+    <div>
+      <div class="tools">
+        <input id="q" class="field" type="search" placeholder="Find a channel by name or ID" aria-label="Find a channel by name or ID">
+        <p id="count" class="note"></p>
+        <p class="note how">To move a channel, drag its grip, type a new number in its box, or focus the grip and press the arrow keys.</p>
+        <button id="gather" class="btn" type="button" title="Move every channel next to the rest of its group" hidden>Gather groups</button>
+      </div>
+      <div class="sheet">
+        <div class="row cols" aria-hidden="true"><span></span><span>No.</span><span>On</span><span></span><span>Display name</span><span>LCN</span><span>Channel ID</span><span>Logo address</span><span>Group</span></div>
+        <ol id="list" class="ruled"></ol>
+        <div id="empty" class="blank" hidden>
+          <h3 class="head">No channels yet</h3>
+          <p>Add your provider's XMLTV address under <a href="#source">Source</a>. After the first sync every channel is listed here in upstream order, ready to drag into place. Channels that appear later are added to the end.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-viewers" class="view" hidden>
+    <h2 class="head">Viewers</h2>
+    <p class="note">Each viewer gets a guide address of their own. Paste it into their player as the TV guide (EPG) address. Revoking a viewer cuts off that address only.</p>
+    <div id="viewers"></div>
+    <form id="addUser" class="inline">
+      <input class="field" type="text" name="label" placeholder="Name a viewer or device, e.g. Dad's Fire Stick" aria-label="New viewer or device name" maxlength="80" required>
+      <button class="btn primary">Add viewer</button>
+    </form>
+    <p class="note" style="margin-top:18px">Addresses end in <code>.xml.gz</code> because some players need that ending to unpack the guide. For plain XML swap it for <code>.xml</code>; it still travels compressed when the player allows. <code>/epg.xml.gz?key=KEY</code> works as well.</p>
+  </section>
+
+  <section id="view-source" class="view" hidden>
+    <h2 class="head">Source</h2>
+    <div class="source" style="margin-top:16px">
+      <form id="settings" class="stack">
+        <label>Upstream XMLTV address
+          <input class="field" type="url" name="upstream_url" placeholder="https://provider.example/xmltv.php?username=…">
+          <small>Plain .xml or .xml.gz. Saving a new address starts a sync.</small></label>
+        <label>Sync schedule
+          <input class="field" type="text" name="schedule" placeholder="6" required>
+          <small>Hours between syncs, such as 6, or a cron expression, such as 0 */6 * * *.</small></label>
+        <label>Public address of this server
+          <input class="field" type="url" name="public_url" placeholder="https://epg.example.com">
+          <small>The reverse proxy or tunnel hostname remote players reach. Used to write viewer addresses.</small></label>
+        <label class="check"><input type="checkbox" name="public_access"> Let anyone with the address fetch the guide, no key needed</label>
+        <div class="inline"><button class="btn primary">Save</button><span id="saved" class="note" role="status"></span></div>
+      </form>
+      <div class="record">
+        <h3 class="head">Sync record</h3>
+        <dl>
+          <div><dt>Last sync</dt><dd id="lastSync"></dd></div>
+          <div><dt>Next sync</dt><dd id="nextSync"></dd></div>
+          <div><dt>Published</dt><dd id="built"></dd></div>
+          <div><dt>File size</dt><dd id="size"></dd></div>
+          <div><dt>Contents</dt><dd id="contents"></dd></div>
+          <div><dt>Last error</dt><dd id="lastError"></dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+</main>
+
+<datalist id="groupNames"></datalist>
+
+<template id="rowT">
+  <li class="row">
+    <button class="handle" type="button" title="Drag to move. Keyboard: arrow keys, Home, End." aria-label="Move this channel: drag, or press the arrow keys. Home and End jump to the top and bottom."></button>
+    <input class="pos" type="text" inputmode="numeric" aria-label="Position in the guide. Type a number to move this channel there.">
+    <input class="on" type="checkbox" aria-label="Enabled">
+    <span class="logo"></span>
+    <input class="cell" type="text" data-f="name" aria-label="Display name">
+    <input class="cell" type="text" data-f="lcn" inputmode="numeric" aria-label="Channel number (LCN)">
+    <span class="cell cid"></span>
+    <input class="cell" type="text" data-f="icon" aria-label="Logo address">
+    <input class="cell" type="text" data-f="grp" list="groupNames" aria-label="Group">
+  </li>
+</template>
+
+<script src="/static/sortable.min.js"></script>
+<script>
+const $ = (sel, el = document) => el.querySelector(sel);
+const list = $("#list");
+const OVERRIDES = ["name", "lcn", "icon"];
+let filterGroup = null;  // null = every group
+let wasRunning = null, lastBuilt, editionKey, viewersKey = "", settingsLoaded = false, loaded = false;
+
+async function api(method, path, body) {
+  // location.origin: a page opened as http://user:pass@host would otherwise make fetch throw
+  const r = await fetch(location.origin + "/api" + path, {
+    method, body: body === undefined ? undefined : JSON.stringify(body),
+    headers: body === undefined ? {} : {"Content-Type": "application/json"},
+  }).catch(() => { throw new Error("Cannot reach the GuideForge server. Check that it is running, then reload this page."); });
+  if (!r.ok) {
+    const detail = (await r.json().catch(() => ({}))).detail;
+    throw new Error(typeof detail === "string" ? detail : `The server answered ${r.status} ${r.statusText}`);
+  }
+  return r.json();
+}
+const fail = e => { $("#alert span").textContent = e.message; $("#alert").hidden = false; };
+$("#alert button").onclick = () => $("#alert").hidden = true;
+const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
+const num = n => Number(n).toLocaleString();
+const mb = n => (n / 1048576).toFixed(n < 1048576 ? 2 : 1) + " MB";
+const sentence = s => s.charAt(0).toUpperCase() + s.slice(1).replace(/[.?!]$/, "");
+function when(iso) {
+  if (!iso) return "not yet";
+  const d = new Date(iso), time = d.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
+  return d.toDateString() === new Date().toDateString() ? time : `${d.toLocaleDateString([], {weekday: "short", day: "numeric", month: "short"})}, ${time}`;
+}
+$("#dateline").textContent = new Date().toLocaleDateString([], {weekday: "long", day: "numeric", month: "long", year: "numeric"});
+
+// ---- views ---------------------------------------------------------------
+const VIEWS = ["line-up", "viewers", "source"];
+function route() {
+  const view = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : VIEWS[0];
+  for (const name of VIEWS) {
+    $("#view-" + name).hidden = name !== view;
+    const link = $(`.edition a[href="#${name}"]`);
+    name === view ? link.setAttribute("aria-current", "page") : link.removeAttribute("aria-current");
+  }
+}
+addEventListener("hashchange", route);
+route();
+
+// ---- edition line, sync record, viewers ----------------------------------
+async function refresh() {
+  const s = await api("GET", "/state");
+  const st = s.status, edition = $("#edition");
+  const published = st.built_at ? ` Players still get the edition published ${when(st.built_at)}.` : "";
+  let text, stop = true, address = false;
+  if (s.running === "sync") text = "Stop press: fetching the upstream guide";
+  else if (s.running || s.dirty) text = "Stop press: publishing your changes";
+  else if (st.error) { text = `${sentence(st.error)}.${published}`; address = /^sync failed/.test(st.error) && !/R2/.test(st.error); }
+  else if (!st.built_at) { stop = false; text = "No edition yet"; }
+  else { stop = false; text = `Published ${when(st.built_at)} · ${num(st.channels)} channels · ${num(st.programmes)} programmes · ${mb(st.output_bytes)} · next sync ${when(s.next_sync)}`; }
+  if (editionKey !== text + address) {  // a live region: touch it only when it has something new to say
+    editionKey = text + address;
+    edition.replaceChildren(text, ...(address ? [" ", el("a", {href: "#source", textContent: "Check the address under Source"}), "."] : []));
+  }
+  edition.classList.toggle("stop", stop);
+  if (lastBuilt !== undefined && st.built_at !== lastBuilt) {  // a new edition landed: one flash of fresh ink
+    edition.classList.remove("fresh"); void edition.offsetWidth; edition.classList.add("fresh");
+  }
+  lastBuilt = st.built_at ?? null;
+  $("#syncBtn").disabled = s.running === "sync" || !s.settings.upstream_url;
+  $("#syncBtn").textContent = s.running === "sync" ? "Syncing" : "Sync now";
+
+  $("#lastSync").textContent = when(st.last_sync);
+  $("#nextSync").textContent = when(s.next_sync);
+  $("#built").textContent = when(st.built_at);
+  $("#size").textContent = st.output_bytes == null ? "not yet" : `${mb(st.output_bytes)} gzipped, from ${mb(st.upstream_bytes)} upstream`;
+  $("#contents").textContent = st.channels == null ? "not yet" : `${num(st.channels)} channels, ${num(st.programmes)} programmes`;
+  $("#lastError").textContent = st.error ? sentence(st.error) : "none";
+  $("#lastError").classList.toggle("stop", !!st.error);
+
+  if (!settingsLoaded) {  // only once, so polling never overwrites what is being typed
+    for (const [k, v] of Object.entries(s.settings)) {
+      const input = $("#settings").elements[k];
+      input.type === "checkbox" ? input.checked = v : input.value = v;
+    }
+    settingsLoaded = true;
+  }
+  renderViewers(s);
+  if (wasRunning === "sync" && !s.running) loadChannels();  // a sync may have brought new channels
+  wasRunning = s.running;
+}
+
+function renderViewers(s) {
+  const key = JSON.stringify([s.tokens, s.settings.public_url, s.settings.public_access, s.r2_url]);
+  if (key === viewersKey) return;
+  viewersKey = key;
+  const bases = [["Local", location.origin]];
+  if (s.settings.public_url) bases.push(["Public", s.settings.public_url]);
+  const address = (who, via, url) => {
+    const input = el("input", {className: "field", type: "text", readOnly: true, value: url, onfocus() { input.select(); }});
+    input.setAttribute("aria-label", `${who}, ${via} guide address`);
+    const copy = el("button", {className: "btn", type: "button", textContent: "Copy for TiviMate", onclick() {
+      input.select();
+      navigator.clipboard ? navigator.clipboard.writeText(url) : document.execCommand("copy");  // no clipboard API on a plain-http LAN address
+      copy.textContent = "Copied"; setTimeout(() => copy.textContent = "Copy for TiviMate", 1500);
+    }});
+    return el("div", {className: "addr"}, el("span", {className: "note", textContent: via}), input, copy);
+  };
+  const viewer = (who, lines, ...extra) =>
+    el("article", {className: "viewer"}, el("div", {className: "who"}, el("h3", {className: "head", textContent: who}), ...extra), el("div", {}, ...lines));
+  const entries = [];
+  if (s.settings.public_access)
+    entries.push(viewer("Anyone", bases.map(([via, base]) => address("Anyone", via, base + "/epg.xml.gz")), el("p", {className: "note", textContent: "Keyless access is on. Turn it off under Source."})));
+  for (const t of s.tokens)
+    entries.push(viewer(t.label, bases.map(([via, base]) => address(t.label, via, `${base}/u/${t.token}/epg.xml.gz`)),
+      el("button", {className: "btn danger", type: "button", textContent: "Revoke", onclick() {
+        if (confirm(`Revoke ${t.label}? That guide address stops working straight away.`))
+          api("DELETE", "/tokens/" + encodeURIComponent(t.token)).then(refresh, fail);
+      }})));
+  if (s.r2_url)
+    entries.push(viewer("R2 mirror", [address("R2 mirror", "R2", s.r2_url + "/epg.xml.gz")], el("p", {className: "note", textContent: "A public bucket address. Keys do not apply to it."})));
+  if (!entries.length)
+    entries.push(el("div", {className: "blank", style: "margin-top:22px"}, el("h3", {className: "head", textContent: "No viewers yet"}),
+      el("p", {textContent: "Nobody can fetch the guide. Name a viewer below to create a guide address for them."})));
+  $("#viewers").replaceChildren(...entries);
+}
+
+$("#syncBtn").onclick = () => api("POST", "/sync").then(refresh, fail);
+$("#settings").onsubmit = e => {
+  e.preventDefault();
+  const f = e.target.elements;
+  api("PUT", "/settings", {upstream_url: f.upstream_url.value, schedule: f.schedule.value, public_url: f.public_url.value, public_access: f.public_access.checked})
+    .then(() => { $("#saved").textContent = "Saved"; setTimeout(() => $("#saved").textContent = "", 2000); return refresh(); }, fail);
+};
+$("#addUser").onsubmit = e => {
+  e.preventDefault();
+  api("POST", "/tokens", {label: e.target.elements.label.value}).then(() => { e.target.reset(); return refresh(); }, fail);
+};
+
+// ---- line-up editor ------------------------------------------------------
+const patch = (ids, fields) => api("PATCH", "/channels", {ids, ...fields}).then(refresh, fail);
+
+function paint(li) {
+  const c = li.c;
+  li.on.checked = !!c.enabled;
+  li.classList.toggle("off", !c.enabled);
+  for (const f of OVERRIDES) {  // a field shows what is published; bold marks where you overrode upstream
+    const input = li.fields[f], up = c["up_" + f] ?? "";
+    input.value = c[f] ?? up;
+    input.classList.toggle("edited", c[f] != null);
+    input.title = c[f] != null ? `Upstream: ${up || "nothing"}. Clear this field to go back to it.` : "";
+  }
+  const src = c.icon || c.up_icon || "";
+  if ((li.logo.firstChild?.getAttribute("src") ?? "") !== src)  // a logo that fails to load removes itself
+    li.logo.replaceChildren(...(src ? [el("img", {alt: "", loading: "lazy", referrerPolicy: "no-referrer", src, onerror() { this.remove(); }})] : []));
+}
+
+async function loadChannels() {
+  const channels = await api("GET", "/channels");
+  list.replaceChildren(...channels.map(c => {
+    const li = $("#rowT").content.firstElementChild.cloneNode(true);
+    Object.assign(li, {c, pos: $(".pos", li), on: $(".on", li), logo: $(".logo", li), fields: {}});
+    for (const input of li.querySelectorAll("[data-f]")) li.fields[input.dataset.f] = input;
+    li.dataset.id = c.id;
+    li.classList.toggle("gone", !c.present);
+    $(".cid", li).textContent = $(".cid", li).title = c.id;
+    li.fields.grp.value = c.grp;
+    paint(li);
+    return li;
+  }));
+  loaded = true;
+  renderGroups();
+}
+
+function renderGroups() {
+  const groups = new Map();
+  let on = 0;
+  for (const {c} of list.children) {
+    const g = groups.get(c.grp) ?? {total: 0, on: 0};
+    g.total++; g.on += c.enabled; on += c.enabled;
+    groups.set(c.grp, g);
+  }
+  const names = [...groups.keys()].sort((a, b) => a.localeCompare(b));
+  if (filterGroup !== null && !groups.has(filterGroup)) filterGroup = null;
+  const item = (name, label, g) => {
+    const pick = el("button", {type: "button", textContent: label, title: label, onclick() { filterGroup = name; renderGroups(); }});
+    pick.setAttribute("aria-pressed", filterGroup === name);
+    const fig = el("span", {className: "fig", textContent: `${num(g.on)}/${num(g.total)}`});
+    if (name === null) return el("li", {}, el("span"), pick, fig);  // no tick here: one slip would overwrite every choice in the guide
+    const mixed = g.on > 0 && g.on < g.total;
+    const box = el("input", {type: "checkbox", checked: g.on === g.total, indeterminate: mixed, onchange() {
+      if (mixed && !confirm(`${label} has ${num(g.on)} channels on and ${num(g.total - g.on)} off. Turn all ${num(g.total)} ${box.checked ? "on" : "off"}?`))
+        return renderGroups();
+      const members = [...list.children].filter(li => li.c.grp === name);
+      for (const li of members) { li.c.enabled = box.checked; paint(li); }
+      renderGroups();
+      patch(members.map(li => li.dataset.id), {enabled: box.checked});
+    }});
+    box.setAttribute("aria-label", `Enable every channel in ${label}`);
+    return el("li", {}, box, pick, fig);
+  };
+  $("#groups").replaceChildren(item(null, "All channels", {total: list.children.length, on}), ...names.map(n => item(n, n || "No group", groups.get(n))));
+  $("#groupNames").replaceChildren(...names.filter(Boolean).map(n => el("option", {value: n})));
+  layout();
+}
+
+// One pass over the rows: filter, renumber, and set a section head wherever the group changes.
+function layout() {
+  const q = $("#q").value.trim().toLowerCase(), total = list.children.length;
+  let n = 0, shown = 0, head = null, run = 0, runs = 0, last;
+  const groups = new Set();
+  const close = () => { if (head) head.dataset.count = run === 1 ? "1 channel" : `${num(run)} channels`; };
+  for (const li of list.children) {
+    const c = li.c;
+    if (li.pos.value !== String(++n) && document.activeElement !== li.pos) li.pos.value = n;
+    if (c.grp !== last) { runs++; last = c.grp; groups.add(c.grp); }
+    const hit = (filterGroup === null || c.grp === filterGroup)
+      && (!q || `${c.id} ${c.name ?? ""} ${c.up_name ?? ""}`.toLowerCase().includes(q));
+    li.hidden = !hit;
+    if (!hit) continue;
+    const starts = !head || head.c.grp !== c.grp;
+    li.classList.toggle("run", starts);
+    li.classList.toggle("lead", shown === 0);
+    if (starts) { close(); head = li; run = 0; li.dataset.run = c.grp || "No group"; }
+    run++; shown++;
+  }
+  close();
+  list.classList.toggle("ruled", !loaded);
+  $(".how").hidden = !total;
+  list.classList.toggle("scattered", runs > 3 * groups.size);
+  $("#gather").hidden = runs <= groups.size;  // nothing to gather once every group sits together
+  $("#empty").hidden = !loaded || total > 0;
+  $("#count").textContent = !total ? "" : (shown === total ? `${num(total)} channels` : `${num(shown)} of ${num(total)} channels shown`)
+    + (runs > 3 * groups.size ? ". Groups are scattered through the line-up, so no section heads are printed." : "");
+}
+$("#q").oninput = layout;
+$("#gather").onclick = () => {
+  if (!confirm("Move every channel next to the rest of its group?\n\nGroups keep the order they first appear in, and channels keep their order within a group. This rewrites the whole line-up.")) return;
+  const rows = [...list.children], first = new Map();
+  rows.forEach((li, i) => first.has(li.c.grp) || first.set(li.c.grp, i));
+  list.replaceChildren(...rows.sort((a, b) => first.get(a.c.grp) - first.get(b.c.grp)));  // stable, so order inside a group survives
+  saveOrder();
+};
+
+// Hidden (filtered-out) rows stay in the DOM, so the DOM order is always the full guide order.
+let orderTimer;
+function saveOrder() {
+  layout();
+  clearTimeout(orderTimer);
+  orderTimer = setTimeout(() => api("PUT", "/channels/order", [...list.children].map(li => li.dataset.id)).then(refresh, fail), 400);
+}
+new Sortable(list, {handle: ".handle", animation: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 150, easing: "cubic-bezier(.16, 1, .3, 1)", ghostClass: "ghost", fallbackOnBody: true, scrollSensitivity: 90, scrollSpeed: 18, onChange: layout, onEnd: saveOrder});
+
+list.addEventListener("change", e => {
+  if (!e.target.matches("input")) return;  // SortableJS also fires an event named "change" on the list while dragging
+  const input = e.target, li = input.closest("li"), c = li.c;
+  if (input === li.pos) {  // type a position to move the channel there
+    const rows = list.children, from = [...rows].indexOf(li) + 1;
+    const to = Math.min(Math.max(parseInt(input.value, 10) || from, 1), rows.length);
+    input.value = to;
+    if (to !== from) {
+      list.insertBefore(li, rows[to > from ? to : to - 1] ?? null);
+      saveOrder();
+      li.scrollIntoView({block: "center"});
+      input.focus();
+    }
+    return;
+  }
+  if (input === li.on) {
+    c.enabled = input.checked;
+    patch([c.id], {enabled: c.enabled});
+  } else {
+    const f = input.dataset.f, value = input.value.trim();
+    // typing the upstream value back, or clearing the field, removes the override
+    c[f] = OVERRIDES.includes(f) ? (value && value !== (c["up_" + f] ?? "") ? value : null) : value;
+    if (f === "grp") input.value = value;
+    patch([c.id], {[f]: c[f] ?? ""});
+  }
+  paint(li);
+  renderGroups();
+});
+
+// Keyboard alternative to dragging.
+list.addEventListener("keydown", e => {
+  if (!e.target.matches(".handle")) return;
+  const li = e.target.closest("li");
+  const visible = dir => { let s = li[dir]; while (s && s.hidden) s = s[dir]; return s; };
+  if (e.key === "ArrowUp") visible("previousElementSibling")?.before(li);
+  else if (e.key === "ArrowDown") visible("nextElementSibling")?.after(li);
+  else if (e.key === "Home") list.prepend(li);
+  else if (e.key === "End") list.append(li);
+  else return;
+  e.preventDefault();
+  saveOrder();
+  e.target.focus();
+  li.scrollIntoView({block: "nearest"});
+});
+
+refresh().then(loadChannels).catch(fail);
+setInterval(() => refresh().catch(fail), 4000);
+</script>
+</body>
+</html>
