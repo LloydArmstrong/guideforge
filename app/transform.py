@@ -38,6 +38,27 @@ def apply_overrides(el, row):
     return el
 
 
+def _clean(value):
+    return str(value).replace('"', "'").replace("\r", " ").replace("\n", " ")
+
+
+def build_playlist(dst, layout):
+    """Write the playlist body (everything after the #EXTM3U line) in player order; dst is replaced atomically."""
+    tmp = dst.with_suffix(".part")
+    with open(tmp, "w", encoding="utf-8", newline="\n") as f:
+        for row in layout:
+            attrs = {
+                "tvg-id": row["tvg"],
+                "tvg-name": row["shown_name"],
+                "tvg-logo": row["shown_icon"],
+                "tvg-chno": row["shown_lcn"],
+                "group-title": row["grp"],
+            }
+            ours = " ".join(f'{k}="{_clean(v)}"' for k, v in attrs.items() if v)
+            f.write(f'#EXTINF:-1 {ours} {row["extra"] or ""}'.rstrip() + f',{_clean(row["shown_name"])}\n{row["url"]}\n')
+    tmp.replace(dst)
+
+
 def build(src, dst, layout):
     """Write dst (gzipped XMLTV): layout's channels in order, then their programmes streamed from src.
 

@@ -4,8 +4,9 @@ services:
     restart: unless-stopped
     environment:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD in .env}
+      PLAYLIST_URL: ${PLAYLIST_URL:-}
       UPSTREAM_URL: ${UPSTREAM_URL:-}
-      SYNC_SCHEDULE: ${SYNC_SCHEDULE:-6}
+      SYNC_SCHEDULE: ${SYNC_SCHEDULE:-0 4 * * *}
       PUBLIC_URL: ${PUBLIC_URL:-}
       TZ: ${TZ:-UTC}
       R2_ENDPOINT: ${R2_ENDPOINT:-}

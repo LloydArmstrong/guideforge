@@ -195,7 +195,7 @@ Almost nothing moves. Rows slide out of the way while one is dragged, and the ed
 - One grotesque, Archivo, with its width axis doing the hierarchy.
 - Flat ink, square corners, no shadows as depth, no texture.
 - Fields are ruled blanks on the sheet, not boxes.
-- Section heads re-set on every reorder and show exactly where a group is split.
+- Section heads re-set while a row is still in the hand, so a channel visibly joins the group it is dragged into.
 - Dense, ruled, tabular; the line-up is the page.
 - Light only. Two authored movements and nothing else.
 
@@ -265,7 +265,7 @@ Spacing is set by hand per relationship rather than from a numeric scale. The fi
 There is one breakpoint, at 1000px. Below it the gutters drop to 16px, every two-column layout becomes one column, the group index stops being sticky and sits above the list, and the line-up keeps its columns at fixed widths inside a horizontally scrolling sheet (866px minimum) rather than collapsing a row into a card.
 
 ### Named Rules
-**The Running Head Rule.** A section head is printed wherever the group changes between two consecutive visible rows, with that run's channel count at its right. A group split in two therefore reads as two sections, which is how the operator finds drift. When the groups are scattered (more runs than three times the number of groups) no heads are printed at all, the count line says so, and Gather groups is offered.
+**The Running Head Rule.** A section head is printed above the first visible row of each group, with that group's channel count at its right. The line-up is always gathered by group, in the order of the Groups index, so every group has exactly one head; a row dragged across a head joins the group it lands in, and the heads and counts re-set as it moves.
 
 ## Elevation & Depth
 
@@ -335,7 +335,7 @@ The sync record is a definition list under a Title head and 3px rule: a 110px So
 - **Do** build fields as ruled blanks: lit paper, one line beneath, no outline.
 - **Do** divide with rules from the existing weights (4px, 3px and 1px ink, 1px hairline) and keep every corner square.
 - **Do** keep figures tabular and keep secondary text at Soft Ink or darker.
-- **Do** print a section head wherever the group changes, and print none when the groups are scattered.
+- **Do** print one section head above the first row of each group, and re-set heads and counts while a row is being dragged.
 - **Do** keep reordering possible from the keyboard and by typing a position, and keep the 2px ink focus outline on every control.
 - **Do** keep the line-up a table at every width; let it scroll sideways below 1000px.
 

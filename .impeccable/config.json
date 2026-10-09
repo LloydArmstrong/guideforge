@@ -11,6 +11,15 @@
         ],
         "createdAt": "2026-10-09T09:51:05.658Z",
         "reason": "user confirmed: on the direction decision page the owner chose The Listings Page card, whose palette lists the newsprint ground #EFEDE6 and whose risk line named the familiarity of newsprint plus spot red"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "2rem",
+        "files": [
+          "app/static/index.html"
+        ],
+        "createdAt": "2026-10-09T14:33:03.895Z",
+        "reason": "documented step: DESIGN.md typography records the wordmark as 2.75rem, 2rem at 1000px and below; present since the first build"
       }
     ]
   }

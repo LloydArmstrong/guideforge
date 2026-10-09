@@ -73,37 +73,40 @@
   .lineup { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 0 32px; align-items: start; }
   .groups { position: sticky; top: 0; max-height: 100vh; overflow-y: auto; padding: 0 12px 24px 0; scrollbar-width: thin; }
   .groups h2 { font-size: 1.125rem; padding: 10px 0 6px; border-top: 3px solid var(--ink); }
-  .groups ul { list-style: none; margin: 10px 0 0; padding: 0; }
-  .groups li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; border-top: 1px solid var(--rule); }
-  .groups li:first-child { border-top-color: var(--ink); font-weight: 650; }
-  .groups button { border: 0; background: none; padding: 6px 4px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
-  .groups button:hover { text-decoration: underline; text-underline-offset: 3px; }
-  .groups button[aria-pressed=true] { font-weight: 800; }
-  .groups button[aria-pressed=true]::before { content: ""; display: inline-block; width: .5em; height: .5em; margin-right: .45em; background: var(--red); }
+  .groups ul { list-style: none; margin: 0; padding: 0; }
+  .groups .all, .groups li { display: grid; grid-template-columns: 16px 22px minmax(0, 1fr) auto; align-items: center; border-top: 1px solid var(--rule); }
+  .groups .all { margin-top: 10px; border-top-color: var(--ink); font-weight: 650; }
+  .groups li.drop, .groups li.ghost { background: var(--moving); }  /* a channel is about to land here, or the group is in the hand */
+  .pick { border: 0; background: none; padding: 6px 4px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+  .pick:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .pick[aria-pressed=true] { font-weight: 800; }
+  .pick[aria-pressed=true]::before { content: ""; display: inline-block; width: .5em; height: .5em; margin-right: .45em; background: var(--red); }
   .groups .fig { color: var(--ink-soft); padding-left: 8px; }
+  #newGroup { flex-wrap: nowrap; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--ink); }
+  #newGroup .field { flex: 1; min-width: 0; }
 
   .tools { display: flex; align-items: center; gap: 10px 20px; flex-wrap: wrap; padding: 0 0 10px; }
-  .tools .btn { margin-left: auto; }
-  .tools .how { flex: 1 1 0; min-width: 260px; max-width: none; }  /* wraps in place instead of pushing the button down */
+  .tools .how { flex: 1 1 0; min-width: 260px; max-width: none; }
   #q { width: 300px; max-width: 100%; }
+  #groupTools { padding-top: 10px; border-top: 1px solid var(--rule); }
+  #groupTools .field { width: 260px; max-width: 100%; }
   .row { display: grid; grid-template-columns: 22px 54px 30px 40px minmax(150px, 1.5fr) 70px minmax(110px, 1fr) minmax(140px, 1.2fr) 120px; align-items: stretch; min-height: 36px; border-top: 1px solid var(--rule); }
   .row > * { min-width: 0; }
   .cols { position: sticky; top: 0; z-index: 2; min-height: 0; background: var(--paper); border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink); font-stretch: 75%; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; }
   .cols span { padding: 6px 8px 5px; }
   #list { list-style: none; margin: 0; padding: 0; }
-  /* off-screen rows skip rendering, which keeps a guide of thousands of channels quick */
+  /* off-screen rows skip rendering, which keeps a line-up of thousands of channels quick */
   #list .row { content-visibility: auto; contain-intrinsic-size: auto 37px; }
   #list .row:hover, #list .row:focus-within { background: linear-gradient(var(--paper-lit), var(--paper-lit)) bottom / 100% 36px no-repeat; }
   #list .row.ghost { background: linear-gradient(var(--moving), var(--moving)) bottom / 100% 36px no-repeat; }
-  /* a section head is printed wherever the group changes, so a group split in two reads as two sections */
+  /* a section head is printed above the first row of each group */
   .row.run::before { content: attr(data-run); grid-row: 1; grid-column: 1 / -1; margin-top: 18px; padding: 7px 0 5px; border-top: 3px solid var(--ink); color: var(--ink);
     font-stretch: 62%; font-weight: 800; font-size: 1.375rem; line-height: 1.05; text-transform: uppercase; letter-spacing: .01em; }
   .row.run::after { content: attr(data-count); grid-row: 1; grid-column: 1 / -1; place-self: end; padding-bottom: 6px; color: var(--ink-soft); }
   #list .row.run:first-child::before, #list .row.run.lead::before { margin-top: 0; border-top: 0; }
-  /* a line-up with its groups scattered would print a head on every row, so it prints none until gathered */
-  #list.scattered .row.run::before, #list.scattered .row.run::after { content: none; }
-  .handle { border: 0; cursor: grab; touch-action: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='14' fill='%2357544E'%3E%3Ccircle cx='1.5' cy='1.5' r='1.5'/%3E%3Ccircle cx='6.5' cy='1.5' r='1.5'/%3E%3Ccircle cx='1.5' cy='7' r='1.5'/%3E%3Ccircle cx='6.5' cy='7' r='1.5'/%3E%3Ccircle cx='1.5' cy='12.5' r='1.5'/%3E%3Ccircle cx='6.5' cy='12.5' r='1.5'/%3E%3C/svg%3E") center / 8px 14px no-repeat; }
-  .handle:active { cursor: grabbing; }
+  .handle, .ghandle { border: 0; padding: 0; cursor: grab; touch-action: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='14' fill='%2357544E'%3E%3Ccircle cx='1.5' cy='1.5' r='1.5'/%3E%3Ccircle cx='6.5' cy='1.5' r='1.5'/%3E%3Ccircle cx='1.5' cy='7' r='1.5'/%3E%3Ccircle cx='6.5' cy='7' r='1.5'/%3E%3Ccircle cx='1.5' cy='12.5' r='1.5'/%3E%3Ccircle cx='6.5' cy='12.5' r='1.5'/%3E%3C/svg%3E") center / 8px 14px no-repeat; }
+  .handle:active, .ghandle:active { cursor: grabbing; }
+  .ghandle { height: 28px; }
   .pos { margin: 2px 0; padding: 0 2px; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); text-align: center; font-stretch: 62%; font-weight: 800; font-size: 1.0625rem; }
   .pos:hover, .pos:focus-visible { background: var(--paper-lit); color: var(--ink); }
   .on { place-self: center; }
@@ -112,14 +115,16 @@
   .cell { border: 0; border-left: 1px solid var(--rule); padding: 0 8px; background: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   input.cell:hover { box-shadow: inset 0 -1px var(--blank); }
   input.cell:focus-visible { outline-offset: -2px; background: #fff; }
+  input.cell:read-only { cursor: default; box-shadow: none; }
   .cell[data-f=name] { font-stretch: 75%; font-weight: 700; font-size: 1rem; }
-  .cell[data-f=icon], .cell[data-f=grp], .cid { color: var(--ink-soft); }
+  .cell[data-f=icon], .cell[data-f=grp], .cell[data-f=tvg] { color: var(--ink-soft); }
+  .cell[data-f=tvg] { font-size: 0.8125rem; }
   input.cell.edited, input.cell.edited:hover { box-shadow: inset 0 -2px currentColor; }
-  .cid { font-size: 0.8125rem; line-height: 35px; }
   .row.off { color: var(--ink-soft); }
   .row.off .pos { background: none; color: var(--ink-soft); border-color: var(--blank); }
   .row.off .logo { filter: grayscale(1); opacity: .55; }
-  .row.gone .cid::after { content: " · not in upstream"; color: var(--red); }
+  .row.gone .cell[data-f=name] { text-decoration: line-through; }  /* gone from upstream */
+  .row.noguide .cell[data-f=tvg], .row.noguide .cell[data-f=tvg]::placeholder { color: var(--red); opacity: 1; }  /* nothing in the guide answers to this id */
   .ruled { min-height: 444px; background: repeating-linear-gradient(to bottom, transparent 0 36px, var(--rule) 36px 37px); }
   .blank { padding: 28px 0; max-width: 60ch; }
   .blank h3 { font-size: 1.125rem; margin-bottom: 6px; }
@@ -128,7 +133,7 @@
   .viewer { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 8px 28px; margin-top: 22px; padding-top: 10px; border-top: 3px solid var(--ink); }
   .viewer h3 { font-size: 1.125rem; overflow-wrap: anywhere; }
   .viewer .who { display: grid; gap: 10px; justify-items: start; align-content: start; }
-  .addr { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 6px 0; border-top: 1px solid var(--rule); }
+  .addr { display: grid; grid-template-columns: 104px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 6px 0; border-top: 1px solid var(--rule); }
   .addr:first-child { border-top: 0; padding-top: 0; }
   .addr .field { font: 0.8125rem ui-monospace, "SF Mono", Menlo, monospace; }
   .inline { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -154,7 +159,7 @@
     .sheet { overflow-x: auto; }
     .sheet > * { min-width: 866px; }
     .row { grid-template-columns: 22px 54px 30px 40px 190px 70px 150px 190px 120px; }
-    .addr { grid-template-columns: 56px minmax(0, 1fr); }
+    .addr { grid-template-columns: 96px minmax(0, 1fr); }
     .addr .btn { grid-column: 2; justify-self: start; }
   }
   @media (prefers-reduced-motion: reduce) { #edition.fresh { animation: none; } }
@@ -172,7 +177,7 @@
       <a href="#viewers">Viewers</a>
       <a href="#source">Source</a>
     </nav>
-    <p id="edition" role="status">Reading the guide</p>
+    <p id="edition" role="status">Reading the line-up</p>
     <button id="syncBtn" class="btn primary" type="button">Sync now</button>
   </div>
   <div id="alert" class="stop" role="alert" hidden><span></span><button class="btn" type="button">Dismiss</button></div>
@@ -180,22 +185,32 @@
   <section id="view-line-up" class="view lineup" aria-label="Line-up">
     <aside class="groups">
       <h2 class="head">Groups</h2>
-      <p class="note">Tick a group to enable or disable every channel in it. Select its name to read only that group.</p>
+      <p class="note">Players show groups in this order. Drag a group to move it, or drop a channel on one. A tick turns a whole group on or off.</p>
+      <div class="all"><span></span><span></span><button id="all" class="pick" type="button">All channels</button><span id="allFig" class="fig"></span></div>
       <ul id="groups"></ul>
+      <form id="newGroup" class="inline">
+        <input class="field" type="text" name="name" placeholder="New group" aria-label="New group name" maxlength="80" required>
+        <button class="btn">Add group</button>
+      </form>
     </aside>
     <div>
       <div class="tools">
         <input id="q" class="field" type="search" placeholder="Find a channel by name or ID" aria-label="Find a channel by name or ID">
         <p id="count" class="note"></p>
-        <p class="note how">To move a channel, drag its grip, type a new number in its box, or focus the grip and press the arrow keys.</p>
-        <button id="gather" class="btn" type="button" title="Move every channel next to the rest of its group" hidden>Gather groups</button>
+        <p class="note how">To move a channel, drag its grip into place or onto a group, type a new number in its box, or focus the grip and press the arrow keys.</p>
       </div>
+      <form id="groupTools" class="tools" hidden>
+        <input class="field" type="text" name="name" aria-label="Name of this group" maxlength="80" required>
+        <button class="btn">Rename group</button>
+        <button id="removeGroup" class="btn danger" type="button">Remove group</button>
+        <p id="removeWhy" class="note"></p>
+      </form>
       <div class="sheet">
-        <div class="row cols" aria-hidden="true"><span></span><span>No.</span><span>On</span><span></span><span>Display name</span><span>LCN</span><span>Channel ID</span><span>Logo address</span><span>Group</span></div>
+        <div class="row cols" aria-hidden="true"><span></span><span>No.</span><span>On</span><span></span><span>Display name</span><span>LCN</span><span>Guide ID</span><span>Logo address</span><span>Group</span></div>
         <ol id="list" class="ruled"></ol>
         <div id="empty" class="blank" hidden>
           <h3 class="head">No channels yet</h3>
-          <p>Add your provider's XMLTV address under <a href="#source">Source</a>. After the first sync every channel is listed here in upstream order, ready to drag into place. Channels that appear later are added to the end.</p>
+          <p>Add your provider's playlist address under <a href="#source">Source</a>, then press Sync now. Every channel is listed here in the provider's own groups, ready to drag into place. Channels that appear later join the end of their group.</p>
         </div>
       </div>
     </div>
@@ -203,29 +218,32 @@
 
   <section id="view-viewers" class="view" hidden>
     <h2 class="head">Viewers</h2>
-    <p class="note">Each viewer gets a guide address of their own. Paste it into their player as the TV guide (EPG) address. Revoking a viewer cuts off that address only.</p>
+    <p class="note">Each viewer gets addresses of their own. With a playlist published, add the playlist address in the player as an M3U playlist: it names that viewer's guide, so the TV guide should follow on its own. If a player does not pick it up, add the guide address too. Revoking a viewer cuts off that viewer only.</p>
     <div id="viewers"></div>
     <form id="addUser" class="inline">
       <input class="field" type="text" name="label" placeholder="Name a viewer or device, e.g. Dad's Fire Stick" aria-label="New viewer or device name" maxlength="80" required>
       <button class="btn primary">Add viewer</button>
     </form>
-    <p class="note" style="margin-top:18px">Addresses end in <code>.xml.gz</code> because some players need that ending to unpack the guide. For plain XML swap it for <code>.xml</code>; it still travels compressed when the player allows. <code>/epg.xml.gz?key=KEY</code> works as well.</p>
+    <p class="note" style="margin-top:18px">The playlist hands a viewer your provider's stream addresses, login included, so give it only to people you would give that login to. Guide addresses end in <code>.xml.gz</code> because some players need that ending; swap it for <code>.xml</code> for plain XML. <code>?key=KEY</code> on <code>/playlist.m3u</code> or <code>/epg.xml.gz</code> works as well.</p>
   </section>
 
   <section id="view-source" class="view" hidden>
     <h2 class="head">Source</h2>
     <div class="source" style="margin-top:16px">
       <form id="settings" class="stack">
-        <label>Upstream XMLTV address
-          <input class="field" type="url" name="upstream_url" placeholder="https://provider.example/xmltv.php?username=…">
-          <small>Plain .xml or .xml.gz. Saving a new address starts a sync.</small></label>
+        <label>Playlist address (M3U)
+          <input class="field" type="url" name="playlist_url" placeholder="http://HOST:PORT/get.php?username=USER&amp;password=PASS&amp;type=m3u_plus&amp;output=ts">
+          <small>Where channels, their order and their groups come from. With an Xtream Codes login it is http://HOST:PORT/get.php?username=USER&amp;password=PASS&amp;type=m3u_plus&amp;output=ts. Live channels only; films and series are left out. Leave empty to edit a guide on its own.</small></label>
+        <label>Guide address (XMLTV)
+          <input class="field" type="url" name="upstream_url" placeholder="https://epg.example/guide.xml.gz">
+          <small>Your EPG supplier's link, or the provider's own at http://HOST:PORT/xmltv.php?username=USER&amp;password=PASS. Plain .xml or .xml.gz.</small></label>
         <label>Sync schedule
-          <input class="field" type="text" name="schedule" placeholder="6" required>
-          <small>Hours between syncs, such as 6, or a cron expression, such as 0 */6 * * *.</small></label>
+          <input class="field" type="text" name="schedule" placeholder="0 4 * * *" required>
+          <small>A cron expression, such as 0 4 * * * for every day at 04:00, or a number of hours, such as 24. Nothing is fetched or published in between unless you press Sync now.</small></label>
         <label>Public address of this server
-          <input class="field" type="url" name="public_url" placeholder="https://epg.example.com">
+          <input class="field" type="url" name="public_url" placeholder="https://tv.example.com">
           <small>The reverse proxy or tunnel hostname remote players reach. Used to write viewer addresses.</small></label>
-        <label class="check"><input type="checkbox" name="public_access"> Let anyone with the address fetch the guide, no key needed</label>
+        <label class="check"><input type="checkbox" name="public_access"> Let anyone with the address fetch the playlist and guide, no key needed</label>
         <div class="inline"><button class="btn primary">Save</button><span id="saved" class="note" role="status"></span></div>
       </form>
       <div class="record">
@@ -234,7 +252,7 @@
           <div><dt>Last sync</dt><dd id="lastSync"></dd></div>
           <div><dt>Next sync</dt><dd id="nextSync"></dd></div>
           <div><dt>Published</dt><dd id="built"></dd></div>
-          <div><dt>File size</dt><dd id="size"></dd></div>
+          <div><dt>Guide size</dt><dd id="size"></dd></div>
           <div><dt>Contents</dt><dd id="contents"></dd></div>
           <div><dt>Last error</dt><dd id="lastError"></dd></div>
         </dl>
@@ -244,16 +262,17 @@
 </main>
 
 <datalist id="groupNames"></datalist>
+<datalist id="guideIds"></datalist>
 
 <template id="rowT">
   <li class="row">
     <button class="handle" type="button" title="Drag to move. Keyboard: arrow keys, Home, End." aria-label="Move this channel: drag, or press the arrow keys. Home and End jump to the top and bottom."></button>
-    <input class="pos" type="text" inputmode="numeric" aria-label="Position in the guide. Type a number to move this channel there.">
+    <input class="pos" type="text" inputmode="numeric" aria-label="Position in the line-up. Type a number to move this channel there.">
     <input class="on" type="checkbox" aria-label="Enabled">
     <span class="logo"></span>
     <input class="cell" type="text" data-f="name" aria-label="Display name">
     <input class="cell" type="text" data-f="lcn" inputmode="numeric" aria-label="Channel number (LCN)">
-    <span class="cell cid"></span>
+    <input class="cell" type="text" data-f="tvg" list="guideIds" placeholder="no guide" aria-label="Guide ID: the guide channel this one takes its programmes from">
     <input class="cell" type="text" data-f="icon" aria-label="Logo address">
     <input class="cell" type="text" data-f="grp" list="groupNames" aria-label="Group">
   </li>
@@ -262,9 +281,12 @@
 <script src="/static/sortable.min.js"></script>
 <script>
 const $ = (sel, el = document) => el.querySelector(sel);
-const list = $("#list");
-const OVERRIDES = ["name", "lcn", "icon"];
-let filterGroup = null;  // null = every group
+const list = $("#list"), index = $("#groups");
+const OVERRIDES = ["name", "lcn", "icon", "tvg"];
+let groupOrder = [];       // every group, in the order players show them
+let guideIds = new Set();  // channel ids the upstream guide has programmes for
+let playlist = false;      // the line-up is playlist streams, not a guide on its own
+let filterGroup = null;    // null = every group
 let wasRunning = null, lastBuilt, editionKey, viewersKey = "", settingsLoaded = false, loaded = false;
 
 async function api(method, path, body) {
@@ -285,6 +307,7 @@ const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.crea
 const num = n => Number(n).toLocaleString();
 const mb = n => (n / 1048576).toFixed(n < 1048576 ? 2 : 1) + " MB";
 const sentence = s => s.charAt(0).toUpperCase() + s.slice(1).replace(/[.?!]$/, "");
+const motion = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 150;
 function when(iso) {
   if (!iso) return "not yet";
   const d = new Date(iso), time = d.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
@@ -309,30 +332,38 @@ route();
 async function refresh() {
   const s = await api("GET", "/state");
   const st = s.status, edition = $("#edition");
-  const published = st.built_at ? ` Players still get the edition published ${when(st.built_at)}.` : "";
+  const configured = !!(s.settings.playlist_url || s.settings.upstream_url);
+  const standing = st.built_at ? ` Players still get the edition published ${when(st.built_at)}.` : "";
   let text, stop = true, address = false;
-  if (s.running === "sync") text = "Stop press: fetching the upstream guide";
-  else if (s.running || s.dirty) text = "Stop press: publishing your changes";
-  else if (st.error) { text = `${sentence(st.error)}.${published}`; address = /^sync failed/.test(st.error) && !/R2/.test(st.error); }
-  else if (!st.built_at) { stop = false; text = "No edition yet"; }
-  else { stop = false; text = `Published ${when(st.built_at)} · ${num(st.channels)} channels · ${num(st.programmes)} programmes · ${mb(st.output_bytes)} · next sync ${when(s.next_sync)}`; }
+  if (s.running) text = "Stop press: fetching upstream and publishing";
+  else if (st.error) {
+    text = `${sentence(st.error)}.${standing}${s.dirty ? " You also have unpublished changes." : ""}`;
+    address = /^sync failed/.test(st.error) && !/R2/.test(st.error);
+  }
+  else if (s.dirty) text = `Unpublished changes.${standing} Yours go out at the next sync, ${when(s.next_sync)}, or when you press Sync now.`;
+  else if (!st.built_at) { stop = false; text = configured ? "No edition yet. Press Sync now to fetch and publish." : "No edition yet"; }
+  else {
+    stop = false;
+    text = [`Published ${when(st.built_at)}`, `${num(st.channels)} channels`, `${num(st.programmes)} programmes`,
+      st.output_bytes == null ? null : mb(st.output_bytes), `next sync ${when(s.next_sync)}`].filter(Boolean).join(" · ");
+  }
   if (editionKey !== text + address) {  // a live region: touch it only when it has something new to say
     editionKey = text + address;
-    edition.replaceChildren(text, ...(address ? [" ", el("a", {href: "#source", textContent: "Check the address under Source"}), "."] : []));
+    edition.replaceChildren(text, ...(address ? [" ", el("a", {href: "#source", textContent: "Check the addresses under Source"}), "."] : []));
   }
   edition.classList.toggle("stop", stop);
   if (lastBuilt !== undefined && st.built_at !== lastBuilt) {  // a new edition landed: one flash of fresh ink
     edition.classList.remove("fresh"); void edition.offsetWidth; edition.classList.add("fresh");
   }
   lastBuilt = st.built_at ?? null;
-  $("#syncBtn").disabled = s.running === "sync" || !s.settings.upstream_url;
-  $("#syncBtn").textContent = s.running === "sync" ? "Syncing" : "Sync now";
+  $("#syncBtn").disabled = !!s.running || !configured;
+  $("#syncBtn").textContent = s.running ? "Syncing" : "Sync now";
 
   $("#lastSync").textContent = when(st.last_sync);
   $("#nextSync").textContent = when(s.next_sync);
-  $("#built").textContent = when(st.built_at);
-  $("#size").textContent = st.output_bytes == null ? "not yet" : `${mb(st.output_bytes)} gzipped, from ${mb(st.upstream_bytes)} upstream`;
-  $("#contents").textContent = st.channels == null ? "not yet" : `${num(st.channels)} channels, ${num(st.programmes)} programmes`;
+  $("#built").textContent = when(st.built_at) + (s.dirty ? ", with changes waiting" : "");
+  $("#size").textContent = st.output_bytes == null ? "no guide published" : `${mb(st.output_bytes)} gzipped, from ${mb(st.upstream_bytes)} upstream`;
+  $("#contents").textContent = st.channels == null ? "not yet" : `${num(st.channels)} channels, ${num(st.guide_channels)} with guide data, ${num(st.programmes)} programmes`;
   $("#lastError").textContent = st.error ? sentence(st.error) : "none";
   $("#lastError").classList.toggle("stop", !!st.error);
 
@@ -344,42 +375,47 @@ async function refresh() {
     settingsLoaded = true;
   }
   renderViewers(s);
-  if (wasRunning === "sync" && !s.running) loadChannels();  // a sync may have brought new channels
+  if (wasRunning && !s.running) loadChannels();  // a sync may have brought new channels
   wasRunning = s.running;
 }
 
 function renderViewers(s) {
-  const key = JSON.stringify([s.tokens, s.settings.public_url, s.settings.public_access, s.r2_url]);
+  const key = JSON.stringify([s.tokens, s.settings.public_url, s.settings.public_access, s.r2_url, s.playlist, s.guide]);
   if (key === viewersKey) return;
   viewersKey = key;
   const bases = [["Local", location.origin]];
   if (s.settings.public_url) bases.push(["Public", s.settings.public_url]);
-  const address = (who, via, url) => {
+  const address = (who, what, url) => {
     const input = el("input", {className: "field", type: "text", readOnly: true, value: url, onfocus() { input.select(); }});
-    input.setAttribute("aria-label", `${who}, ${via} guide address`);
+    input.setAttribute("aria-label", `${who}, ${what} address`);
     const copy = el("button", {className: "btn", type: "button", textContent: "Copy for TiviMate", onclick() {
       input.select();
       navigator.clipboard ? navigator.clipboard.writeText(url) : document.execCommand("copy");  // no clipboard API on a plain-http LAN address
       copy.textContent = "Copied"; setTimeout(() => copy.textContent = "Copy for TiviMate", 1500);
     }});
-    return el("div", {className: "addr"}, el("span", {className: "note", textContent: via}), input, copy);
+    return el("div", {className: "addr"}, el("span", {className: "note", textContent: what}), input, copy);
   };
-  const viewer = (who, lines, ...extra) =>
-    el("article", {className: "viewer"}, el("div", {className: "who"}, el("h3", {className: "head", textContent: who}), ...extra), el("div", {}, ...lines));
+  // the playlist comes first: it is the one address a player needs
+  const lines = (who, path) => bases.flatMap(([via, base]) => [
+    s.playlist && address(who, `${via} playlist`, `${base}${path}/playlist.m3u`),
+    (s.guide || !s.playlist) && address(who, `${via} guide`, `${base}${path}/epg.xml.gz`),
+  ].filter(Boolean));
+  const viewer = (who, rows, ...extra) =>
+    el("article", {className: "viewer"}, el("div", {className: "who"}, el("h3", {className: "head", textContent: who}), ...extra), el("div", {}, ...rows));
   const entries = [];
   if (s.settings.public_access)
-    entries.push(viewer("Anyone", bases.map(([via, base]) => address("Anyone", via, base + "/epg.xml.gz")), el("p", {className: "note", textContent: "Keyless access is on. Turn it off under Source."})));
+    entries.push(viewer("Anyone", lines("Anyone", ""), el("p", {className: "note", textContent: "Keyless access is on. Turn it off under Source."})));
   for (const t of s.tokens)
-    entries.push(viewer(t.label, bases.map(([via, base]) => address(t.label, via, `${base}/u/${t.token}/epg.xml.gz`)),
+    entries.push(viewer(t.label, lines(t.label, "/u/" + t.token),
       el("button", {className: "btn danger", type: "button", textContent: "Revoke", onclick() {
-        if (confirm(`Revoke ${t.label}? That guide address stops working straight away.`))
+        if (confirm(`Revoke ${t.label}? Their addresses stop working straight away.`))
           api("DELETE", "/tokens/" + encodeURIComponent(t.token)).then(refresh, fail);
       }})));
   if (s.r2_url)
-    entries.push(viewer("R2 mirror", [address("R2 mirror", "R2", s.r2_url + "/epg.xml.gz")], el("p", {className: "note", textContent: "A public bucket address. Keys do not apply to it."})));
+    entries.push(viewer("R2 mirror", [address("R2 mirror", "R2 guide", s.r2_url + "/epg.xml.gz")], el("p", {className: "note", textContent: "A public bucket address for the guide only. Keys do not apply to it."})));
   if (!entries.length)
     entries.push(el("div", {className: "blank", style: "margin-top:22px"}, el("h3", {className: "head", textContent: "No viewers yet"}),
-      el("p", {textContent: "Nobody can fetch the guide. Name a viewer below to create a guide address for them."})));
+      el("p", {textContent: "Nobody can fetch the playlist or guide. Name a viewer below to create addresses for them."})));
   $("#viewers").replaceChildren(...entries);
 }
 
@@ -387,8 +423,8 @@ $("#syncBtn").onclick = () => api("POST", "/sync").then(refresh, fail);
 $("#settings").onsubmit = e => {
   e.preventDefault();
   const f = e.target.elements;
-  api("PUT", "/settings", {upstream_url: f.upstream_url.value, schedule: f.schedule.value, public_url: f.public_url.value, public_access: f.public_access.checked})
-    .then(() => { $("#saved").textContent = "Saved"; setTimeout(() => $("#saved").textContent = "", 2000); return refresh(); }, fail);
+  api("PUT", "/settings", {playlist_url: f.playlist_url.value, upstream_url: f.upstream_url.value, schedule: f.schedule.value, public_url: f.public_url.value, public_access: f.public_access.checked})
+    .then(() => { $("#saved").textContent = "Saved. New addresses are fetched at the next sync."; setTimeout(() => $("#saved").textContent = "", 4000); return refresh(); }, fail);
 };
 $("#addUser").onsubmit = e => {
   e.preventDefault();
@@ -396,33 +432,44 @@ $("#addUser").onsubmit = e => {
 };
 
 // ---- line-up editor ------------------------------------------------------
+// The list is always in player order: gathered by group, groups in index order.
 const patch = (ids, fields) => api("PATCH", "/channels", {ids, ...fields}).then(refresh, fail);
+const label = name => name || "No group";
 
 function paint(li) {
   const c = li.c;
   li.on.checked = !!c.enabled;
   li.classList.toggle("off", !c.enabled);
-  for (const f of OVERRIDES) {  // a field shows what is published; bold marks where you overrode upstream
+  for (const f of OVERRIDES) {  // a field shows what is published; the rule under it marks where you overrode upstream
     const input = li.fields[f], up = c["up_" + f] ?? "";
     input.value = c[f] ?? up;
     input.classList.toggle("edited", c[f] != null);
     input.title = c[f] != null ? `Upstream: ${up || "nothing"}. Clear this field to go back to it.` : "";
   }
+  li.classList.toggle("noguide", playlist && guideIds.size > 0 && !guideIds.has(c.tvg ?? c.up_tvg ?? ""));
   const src = c.icon || c.up_icon || "";
   if ((li.logo.firstChild?.getAttribute("src") ?? "") !== src)  // a logo that fails to load removes itself
     li.logo.replaceChildren(...(src ? [el("img", {alt: "", loading: "lazy", referrerPolicy: "no-referrer", src, onerror() { this.remove(); }})] : []));
 }
 
 async function loadChannels() {
-  const channels = await api("GET", "/channels");
-  list.replaceChildren(...channels.map(c => {
+  const data = await api("GET", "/channels");
+  groupOrder = data.groups;
+  guideIds = new Set(data.guide.map(([id]) => id));
+  playlist = data.channels.some(c => c.stream);
+  $("#guideIds").replaceChildren(...(playlist ? data.guide.map(([id, name]) => el("option", {value: id, label: name ?? ""})) : []));
+  list.replaceChildren(...data.channels.map(c => {
     const li = $("#rowT").content.firstElementChild.cloneNode(true);
-    Object.assign(li, {c, pos: $(".pos", li), on: $(".on", li), logo: $(".logo", li), fields: {}});
+    Object.assign(li, {c, saved: c.grp, pos: $(".pos", li), on: $(".on", li), logo: $(".logo", li), fields: {}});
     for (const input of li.querySelectorAll("[data-f]")) li.fields[input.dataset.f] = input;
     li.dataset.id = c.id;
-    li.classList.toggle("gone", !c.present);
-    $(".cid", li).textContent = $(".cid", li).title = c.id;
+    li.fields.tvg.readOnly = !playlist;  // on its own, a guide channel's id is not ours to change: players match on it
     li.fields.grp.value = c.grp;
+    if (!c.present) {
+      li.classList.add("gone");
+      li.title = "No longer in the upstream source. Kept in its place in case it returns.";
+      li.fields.name.setAttribute("aria-label", "Display name (no longer in the upstream source)");
+    }
     paint(li);
     return li;
   }));
@@ -431,83 +478,138 @@ async function loadChannels() {
 }
 
 function renderGroups() {
-  const groups = new Map();
+  const tally = new Map(groupOrder.map(name => [name, {total: 0, on: 0}]));
   let on = 0;
   for (const {c} of list.children) {
-    const g = groups.get(c.grp) ?? {total: 0, on: 0};
+    if (!tally.has(c.grp)) { tally.set(c.grp, {total: 0, on: 0}); groupOrder.push(c.grp); }
+    const g = tally.get(c.grp);
     g.total++; g.on += c.enabled; on += c.enabled;
-    groups.set(c.grp, g);
   }
-  const names = [...groups.keys()].sort((a, b) => a.localeCompare(b));
-  if (filterGroup !== null && !groups.has(filterGroup)) filterGroup = null;
-  const item = (name, label, g) => {
-    const pick = el("button", {type: "button", textContent: label, title: label, onclick() { filterGroup = name; renderGroups(); }});
-    pick.setAttribute("aria-pressed", filterGroup === name);
-    const fig = el("span", {className: "fig", textContent: `${num(g.on)}/${num(g.total)}`});
-    if (name === null) return el("li", {}, el("span"), pick, fig);  // no tick here: one slip would overwrite every choice in the guide
-    const mixed = g.on > 0 && g.on < g.total;
-    const box = el("input", {type: "checkbox", checked: g.on === g.total, indeterminate: mixed, onchange() {
-      if (mixed && !confirm(`${label} has ${num(g.on)} channels on and ${num(g.total - g.on)} off. Turn all ${num(g.total)} ${box.checked ? "on" : "off"}?`))
+  if (filterGroup !== null && !tally.has(filterGroup)) filterGroup = null;
+  index.replaceChildren(...groupOrder.map(name => {
+    const g = tally.get(name), mixed = g.on > 0 && g.on < g.total;
+    const grip = el("button", {className: "ghandle", type: "button", title: "Drag to move this group. Keyboard: arrow keys."});
+    grip.setAttribute("aria-label", `Move ${label(name)}: drag, or press the arrow keys`);
+    const box = el("input", {type: "checkbox", checked: g.total > 0 && g.on === g.total, indeterminate: mixed, disabled: !g.total, onchange() {
+      if (mixed && !confirm(`${label(name)} has ${num(g.on)} channels on and ${num(g.total - g.on)} off. Turn all ${num(g.total)} ${box.checked ? "on" : "off"}?`))
         return renderGroups();
       const members = [...list.children].filter(li => li.c.grp === name);
       for (const li of members) { li.c.enabled = box.checked; paint(li); }
       renderGroups();
       patch(members.map(li => li.dataset.id), {enabled: box.checked});
     }});
-    box.setAttribute("aria-label", `Enable every channel in ${label}`);
-    return el("li", {}, box, pick, fig);
-  };
-  $("#groups").replaceChildren(item(null, "All channels", {total: list.children.length, on}), ...names.map(n => item(n, n || "No group", groups.get(n))));
-  $("#groupNames").replaceChildren(...names.filter(Boolean).map(n => el("option", {value: n})));
+    box.setAttribute("aria-label", `Enable every channel in ${label(name)}`);
+    const pick = el("button", {className: "pick", type: "button", textContent: label(name), title: label(name), onclick() { filterGroup = name; renderGroups(); }});
+    pick.setAttribute("aria-pressed", filterGroup === name);
+    const li = el("li", {}, grip, box, pick, el("span", {className: "fig", textContent: `${num(g.on)}/${num(g.total)}`}));
+    li.dataset.name = name;
+    return li;
+  }));
+  $("#all").setAttribute("aria-pressed", filterGroup === null);
+  $("#allFig").textContent = `${num(on)}/${num(list.children.length)}`;
+  $("#groupNames").replaceChildren(...groupOrder.filter(Boolean).map(name => el("option", {value: name})));
+
+  const tools = $("#groupTools");  // rename and remove act on the group being read
+  tools.hidden = filterGroup === null;
+  if (filterGroup === null) delete tools.dataset.group;
+  else {
+    if (tools.dataset.group !== filterGroup) { tools.dataset.group = filterGroup; tools.elements.name.value = filterGroup; }
+    const empty = !tally.get(filterGroup).total;
+    $("#removeGroup").disabled = !empty;
+    $("#removeWhy").textContent = empty ? "" : "A group can be removed once it is empty.";
+  }
   layout();
 }
+$("#all").onclick = () => { filterGroup = null; renderGroups(); };
 
-// One pass over the rows: filter, renumber, and set a section head wherever the group changes.
+// One pass over the rows: filter, renumber, and set a section head on the first row of each group.
 function layout() {
   const q = $("#q").value.trim().toLowerCase(), total = list.children.length;
-  let n = 0, shown = 0, head = null, run = 0, runs = 0, last;
-  const groups = new Set();
+  let n = 0, shown = 0, head = null, run = 0;
   const close = () => { if (head) head.dataset.count = run === 1 ? "1 channel" : `${num(run)} channels`; };
   for (const li of list.children) {
     const c = li.c;
     if (li.pos.value !== String(++n) && document.activeElement !== li.pos) li.pos.value = n;
-    if (c.grp !== last) { runs++; last = c.grp; groups.add(c.grp); }
     const hit = (filterGroup === null || c.grp === filterGroup)
-      && (!q || `${c.id} ${c.name ?? ""} ${c.up_name ?? ""}`.toLowerCase().includes(q));
+      && (!q || `${c.id} ${c.name ?? ""} ${c.up_name ?? ""} ${c.tvg ?? c.up_tvg ?? ""}`.toLowerCase().includes(q));
     li.hidden = !hit;
     if (!hit) continue;
     const starts = !head || head.c.grp !== c.grp;
     li.classList.toggle("run", starts);
     li.classList.toggle("lead", shown === 0);
-    if (starts) { close(); head = li; run = 0; li.dataset.run = c.grp || "No group"; }
+    if (starts) { close(); head = li; run = 0; li.dataset.run = label(c.grp); }
     run++; shown++;
   }
   close();
   list.classList.toggle("ruled", !loaded);
   $(".how").hidden = !total;
-  list.classList.toggle("scattered", runs > 3 * groups.size);
-  $("#gather").hidden = runs <= groups.size;  // nothing to gather once every group sits together
   $("#empty").hidden = !loaded || total > 0;
-  $("#count").textContent = !total ? "" : (shown === total ? `${num(total)} channels` : `${num(shown)} of ${num(total)} channels shown`)
-    + (runs > 3 * groups.size ? ". Groups are scattered through the line-up, so no section heads are printed." : "");
+  $("#count").textContent = !total ? ""
+    : !shown && filterGroup !== null && !q ? "No channels in this group yet. Choose All channels, then drop one on its name."
+    : shown === total ? `${num(total)} channels` : `${num(shown)} of ${num(total)} channels shown`;
 }
 $("#q").oninput = layout;
-$("#gather").onclick = () => {
-  if (!confirm("Move every channel next to the rest of its group?\n\nGroups keep the order they first appear in, and channels keep their order within a group. This rewrites the whole line-up.")) return;
-  const rows = [...list.children], first = new Map();
-  rows.forEach((li, i) => first.has(li.c.grp) || first.set(li.c.grp, i));
-  list.replaceChildren(...rows.sort((a, b) => first.get(a.c.grp) - first.get(b.c.grp)));  // stable, so order inside a group survives
-  saveOrder();
-};
 
-// Hidden (filtered-out) rows stay in the DOM, so the DOM order is always the full guide order.
-let orderTimer;
-function saveOrder() {
-  layout();
-  clearTimeout(orderTimer);
-  orderTimer = setTimeout(() => api("PUT", "/channels/order", [...list.children].map(li => li.dataset.id)).then(refresh, fail), 400);
+// A row that lands beside a row of another group joins that group.
+function adopt(li, other) {
+  if (other?.c && other !== li && other.c.grp !== li.c.grp) li.c.grp = li.fields.grp.value = other.c.grp;
 }
-new Sortable(list, {handle: ".handle", animation: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 150, easing: "cubic-bezier(.16, 1, .3, 1)", ghostClass: "ghost", fallbackOnBody: true, scrollSensitivity: 90, scrollSpeed: 18, onChange: layout, onEnd: saveOrder});
+// Hidden (filtered-out) rows stay in the DOM, so the DOM order is always the full line-up.
+let orderTimer;
+function commit(li) {  // save where a row ended up
+  clearTimeout(orderTimer);
+  orderTimer = setTimeout(() => api("PUT", "/channels/order", [...list.children].map(row => row.dataset.id)).then(refresh, fail), 400);
+  if (li.c.grp !== li.saved) patch([li.dataset.id], {grp: li.saved = li.c.grp});
+  renderGroups();
+}
+function regroup() {  // put the rows back in group order; stable, so order inside a group survives
+  const at = new Map(groupOrder.map((name, i) => [name, i]));
+  list.replaceChildren(...[...list.children].sort((a, b) => at.get(a.c.grp) - at.get(b.c.grp)));
+  renderGroups();
+}
+function moveToGroup(li, name) {
+  if (!groupOrder.includes(name)) groupOrder.push(name);
+  li.c.grp = li.fields.grp.value = name;
+  list.append(li);  // regroup is stable, so the row lands at the end of its new group
+  regroup();
+  commit(li);
+}
+function saveGroups() {
+  groupOrder = [...index.children].map(li => li.dataset.name);
+  api("PUT", "/groups", groupOrder).then(refresh, fail);
+  regroup();
+}
+
+// Dragging a channel: within the list, or onto a group in the index.
+let over = null, dropGroup = null;
+function markDrop(li) {
+  $(".drop", index)?.classList.remove("drop");
+  li?.classList.add("drop");
+  dropGroup = li ? li.dataset.name : null;
+}
+const easing = "cubic-bezier(.16, 1, .3, 1)";
+new Sortable(list, {
+  handle: ".handle", animation: motion, easing, ghostClass: "ghost", fallbackOnBody: true, scrollSensitivity: 90, scrollSpeed: 18,
+  onMove(e) { over = e.related; },
+  onChange(e) { adopt(e.item, over); layout(); },  // section heads re-set while the row is still in the hand
+  onEnd(e) {
+    const point = e.originalEvent?.changedTouches?.[0] ?? e.originalEvent;  // touch has no dragover, so look under the finger
+    const under = point && document.elementFromPoint(point.clientX, point.clientY)?.closest("#groups li");
+    const target = dropGroup ?? under?.dataset.name ?? null;
+    over = null;
+    markDrop(null);
+    target === null ? commit(e.item) : moveToGroup(e.item, target);
+  },
+});
+index.addEventListener("dragover", e => {
+  const li = e.target.closest("li");
+  if (!li || !Sortable.dragged?.classList.contains("row")) return;  // only channels land on a group
+  e.preventDefault();
+  if (!li.classList.contains("drop")) markDrop(li);
+});
+index.addEventListener("dragleave", e => { if (!index.contains(e.relatedTarget)) markDrop(null); });
+list.addEventListener("dragover", () => { if (dropGroup !== null) markDrop(null); });
+new Sortable(index, {handle: ".ghandle", animation: motion, easing, ghostClass: "ghost", onEnd: saveGroups});
 
 list.addEventListener("change", e => {
   if (!e.target.matches("input")) return;  // SortableJS also fires an event named "change" on the list while dragging
@@ -517,42 +619,84 @@ list.addEventListener("change", e => {
     const to = Math.min(Math.max(parseInt(input.value, 10) || from, 1), rows.length);
     input.value = to;
     if (to !== from) {
-      list.insertBefore(li, rows[to > from ? to : to - 1] ?? null);
-      saveOrder();
+      const target = rows[to - 1];
+      to > from ? target.after(li) : target.before(li);
+      adopt(li, target);
+      commit(li);
       li.scrollIntoView({block: "center"});
       input.focus();
     }
     return;
   }
+  const f = input.dataset.f, value = input.value.trim();
+  if (f === "grp") return value === c.grp ? void (input.value = value) : moveToGroup(li, value);
   if (input === li.on) {
     c.enabled = input.checked;
     patch([c.id], {enabled: c.enabled});
-  } else {
-    const f = input.dataset.f, value = input.value.trim();
-    // typing the upstream value back, or clearing the field, removes the override
-    c[f] = OVERRIDES.includes(f) ? (value && value !== (c["up_" + f] ?? "") ? value : null) : value;
-    if (f === "grp") input.value = value;
+  } else {  // typing the upstream value back, or clearing the field, removes the override
+    c[f] = value && value !== (c["up_" + f] ?? "") ? value : null;
     patch([c.id], {[f]: c[f] ?? ""});
   }
   paint(li);
   renderGroups();
 });
 
-// Keyboard alternative to dragging.
+// Keyboard alternative to dragging. Stepping past the edge of a group crosses into the next one.
 list.addEventListener("keydown", e => {
   if (!e.target.matches(".handle")) return;
   const li = e.target.closest("li");
   const visible = dir => { let s = li[dir]; while (s && s.hidden) s = s[dir]; return s; };
-  if (e.key === "ArrowUp") visible("previousElementSibling")?.before(li);
-  else if (e.key === "ArrowDown") visible("nextElementSibling")?.after(li);
-  else if (e.key === "Home") list.prepend(li);
-  else if (e.key === "End") list.append(li);
+  const step = (other, place) => { if (other && other.c.grp === li.c.grp) place(other); else adopt(li, other); };
+  if (e.key === "ArrowUp") step(visible("previousElementSibling"), other => other.before(li));
+  else if (e.key === "ArrowDown") step(visible("nextElementSibling"), other => other.after(li));
+  else if (e.key === "Home") { adopt(li, list.firstElementChild); list.prepend(li); }
+  else if (e.key === "End") { adopt(li, list.lastElementChild); list.append(li); }
   else return;
   e.preventDefault();
-  saveOrder();
+  commit(li);
   e.target.focus();
   li.scrollIntoView({block: "nearest"});
 });
+index.addEventListener("keydown", e => {
+  if (!e.target.matches(".ghandle") || !["ArrowUp", "ArrowDown"].includes(e.key)) return;
+  const li = e.target.closest("li"), name = li.dataset.name;
+  e.key === "ArrowUp" ? li.previousElementSibling?.before(li) : li.nextElementSibling?.after(li);
+  e.preventDefault();
+  saveGroups();  // redraws the index, so find the group's grip again
+  $(".ghandle", [...index.children].find(row => row.dataset.name === name)).focus();
+});
+
+$("#newGroup").onsubmit = e => {
+  e.preventDefault();
+  const name = e.target.elements.name.value.trim();
+  if (!name) return;
+  e.target.reset();
+  if (!groupOrder.includes(name)) {
+    groupOrder.unshift(name);  // first, where it can be seen and where a group made by hand usually belongs
+    api("PUT", "/groups", groupOrder).then(refresh, fail);
+    renderGroups();
+  }
+  $(".groups").scrollTo(0, 0);
+};
+$("#groupTools").onsubmit = e => {
+  e.preventDefault();
+  const old = filterGroup, name = e.target.elements.name.value.trim();
+  if (!name || name === old) return;
+  if (groupOrder.includes(name) && !confirm(`${name} already exists. Move every channel from ${label(old)} into it?`)) return;
+  api("POST", "/groups/rename", {old, new: name}).then(order => {
+    for (const li of list.children) if (li.c.grp === old) li.c.grp = li.saved = li.fields.grp.value = name;
+    groupOrder = order;
+    filterGroup = name;
+    regroup();
+    return refresh();
+  }, fail);
+};
+$("#removeGroup").onclick = () => {
+  groupOrder = groupOrder.filter(name => name !== filterGroup);
+  filterGroup = null;
+  api("PUT", "/groups", groupOrder).then(refresh, fail);
+  renderGroups();
+};
 
 refresh().then(loadChannels).catch(fail);
 setInterval(() => refresh().catch(fail), 4000);
