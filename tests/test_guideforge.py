@@ -3,6 +3,7 @@
 Run: pip install httpx && python tests/test_guideforge.py
 """
 import gzip
+import json
 import os
 import sys
 import tempfile
@@ -10,6 +11,7 @@ import threading
 from functools import partial
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
+from urllib.parse import parse_qsl, urlsplit
 
 os.environ["DATA_DIR"] = tempfile.mkdtemp()
 os.environ["ADMIN_PASSWORD"] = "pw"
@@ -18,10 +20,38 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from fastapi.testclient import TestClient  # noqa: E402
 from lxml import etree  # noqa: E402
 
-from app import db, m3u, sync, transform  # noqa: E402
+from app import db, m3u, sync, transform, xtream  # noqa: E402
 from app.main import app  # noqa: E402
 
 WWW = Path(tempfile.mkdtemp())
+
+
+CATEGORIES = [{"category_id": "7", "category_name": "USA"}, {"category_id": "3", "category_name": "France"},
+              {"category_id": "5", "category_name": "UK"}]
+STREAMS = [
+    {"num": 1, "name": "FR: France 2", "stream_id": 101, "stream_icon": "http://logo/f2.png", "epg_channel_id": "d.fr", "category_id": "3"},
+    {"num": 2, "name": "UK: Mystery", "stream_id": 102, "stream_icon": "", "epg_channel_id": "", "category_id": "5"},
+    {"num": 3, "name": "US: CNN", "stream_id": 103, "stream_icon": None, "epg_channel_id": "c.us", "category_id": "7"},
+    {"num": 4, "name": "Loose", "stream_id": 104, "category_id": "99"},
+]
+
+
+class Provider(SimpleHTTPRequestHandler):
+    """Static files, plus just enough of the Xtream Codes player API."""
+
+    def do_GET(self):
+        asked = urlsplit(self.path)
+        if asked.path != "/player_api.php":
+            return super().do_GET()
+        query = dict(parse_qsl(asked.query))
+        ok = (query.get("username"), query.get("password")) == ("user", "pa ss")
+        answers = {None: {"user_info": {"auth": 1}}, "get_live_categories": CATEGORIES, "get_live_streams": STREAMS}
+        body = json.dumps(answers[query.get("action")] if ok else {"user_info": {"auth": 0}}).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
 
 def url(name):
@@ -53,7 +83,7 @@ def provider(password="pass"):
         f"http://prov:8080/live/user/{password}/102.ts\n"
         '#EXTINF:-1 tvg-id="x.film" group-title="Films",Some Film\n'
         f"http://prov:8080/movie/user/{password}/900.mkv\n"
-        '#EXTINF:-1 tvg-id="c.us" group-title="USA",US: CNN\n'
+        '#EXTINF:-1 tvg-id="C.US" group-title="USA",US: CNN\n'
         f"http://prov:8080/user/{password}/103\n"
     )
     return url("get.php")
@@ -137,13 +167,14 @@ def test_playlist():
     assert db.groups() == ["France", "UK", "USA"]
     sync.sync()
     assert [(c["id"], c["grp"], c["up_tvg"]) for c in db.channels()] == [
-        ("101", "France", "d.fr"), ("102", "UK", None), ("103", "USA", "c.us")]
+        ("101", "France", "d.fr"), ("102", "UK", None), ("103", "USA", "C.US")]
     info, stream = playlist()[0]
     assert stream == "http://prov:8080/live/user/pass/101.ts"
     assert info == ('#EXTINF:-1 tvg-id="d.fr" tvg-name="FR: France 2" tvg-logo="http://logo/f2.png"'
                     ' group-title="France" timeshift="3",FR: France 2')  # unknown attributes pass through
     assert playlist()[1][0] == """#EXTINF:-1 tvg-name="UK: Mystery 'One'" group-title="UK",UK: Mystery 'One'"""
     assert guide()[1] == ["d.fr", "c.us"]  # only guide channels a published stream points at
+    assert 'tvg-id="c.us"' in playlist()[2][0]  # the provider wrote C.US: matched whatever its case, published the guide's way
 
     # the whole point: groups and order are the operator's
     db.set_groups(["Favourites", "France", "UK", "USA"])  # a new, empty group, put first
@@ -166,6 +197,29 @@ def test_playlist():
         ("103", "Favourites", "CNN"), ("102", "UK", None), ("101", "FR", None)]
     assert playlist()[0][1] == "http://prov:8080/user/hunter2/103"
     assert not list(db.DATA.glob("*.download"))  # the raw playlist, with its login, is not kept
+
+
+def test_xtream():
+    assert xtream.server_root(" line.example.com:8080/get.php?username=u ") == "http://line.example.com:8080"
+    assert xtream.server_root("file:///etc/passwd") == "" and xtream.server_root("") == ""
+
+    # the provider's Xtream login takes over from the M3U link that is still configured
+    db.put("xtream_url", url("player_api.php?pasted=whole-link"))
+    db.put("xtream_user", "user")
+    db.put("xtream_pass", "wrong")
+    sync.sync()
+    assert "did not accept that username and password" in db.get("status")["error"]
+    db.put("xtream_pass", "pa ss")
+    sync.sync()
+    assert db.get("status")["error"] is None, db.get("status")
+    rows = {c["id"]: c for c in db.channels()}
+    # same stream ids, so the line-up built from the M3U link carries over; the new stream joins the end
+    assert (rows["103"]["grp"], rows["103"]["name"], rows["102"]["tvg"]) == ("Favourites", "CNN", "zz.uk")
+    assert [c["id"] for c in db.channels()][-1] == "104" and rows["104"]["grp"] == ""
+    assert playlist()[0][1] == url("live/user/pa%20ss/103.ts")
+
+    # on a fresh install the provider's own category order is the starting order
+    assert [e["id"] for e in xtream.read_channels(url("")[:-1], "user", "pa ss")] == ["103", "101", "102", "104"]
 
 
 def test_serving():
@@ -197,7 +251,7 @@ def test_serving():
         r = http.get(f"/u/{token}/playlist.m3u")
         assert r.status_code == 200 and r.headers["content-type"].startswith("audio/x-mpegurl")
         assert r.text.splitlines()[0] == f'#EXTM3U url-tvg="http://testserver/u/{token}/epg.xml.gz"'
-        assert r.text.splitlines()[2] == "http://prov:8080/user/hunter2/103"
+        assert r.text.splitlines()[2] == url("live/user/pa%20ss/103.ts")
         assert http.get(f"/playlist.m3u?key={token}", headers={"If-None-Match": r.headers["etag"]}).status_code == 304
 
         # management API: locked without the password
@@ -214,15 +268,16 @@ def test_serving():
         assert r.status_code == 200, r.text
         assert http.put("/api/groups", auth=auth, json=["Kids", "Favourites", "UK", "FR"]).json()[0] == "Kids"
         assert http.post("/api/groups/rename", auth=auth, json={"old": "FR", "new": "France"}).status_code == 200
-        assert http.put("/api/settings", auth=auth, json={
-            "playlist_url": db.get("playlist_url"), "upstream_url": db.get("upstream_url"),
-            "schedule": "24", "public_url": "", "public_access": False,
-        }).status_code == 200
+        settings = {"xtream_url": db.get("xtream_url"), "xtream_user": "user", "xtream_pass": "pa ss", "playlist_url": "",
+                    "upstream_url": db.get("upstream_url"), "schedule": "24", "public_url": "", "public_access": False}
+        saved = http.put("/api/settings", auth=auth, json=settings)
+        assert saved.status_code == 200 and saved.json()["xtream_url"] == url("")[:-1]  # trimmed to the server root
+        assert http.put("/api/settings", auth=auth, json={**settings, "xtream_pass": ""}).status_code == 400
         state = http.get("/api/state", auth=auth).json()
         assert state["dirty"] and state["running"] is None and state["status"]["built_at"] == published
         assert "Mystery" not in db.PLAYLIST.read_text().replace("UK: Mystery", "")
         listing = http.get("/api/channels", auth=auth).json()
-        assert listing["groups"] == ["Kids", "Favourites", "UK", "France"]
+        assert listing["groups"] == ["Kids", "Favourites", "UK", "France", ""]  # "": the ungrouped stream's group, kept because in use
         assert [(c["id"], c["grp"], c["name"]) for c in listing["channels"]][:2] == [
             ("102", "Favourites", "Mystery"), ("103", "Favourites", "CNN")]  # the editor then saves where it was dropped
         assert ["zz.uk", "ZZ.UK"] in listing["guide"]
@@ -230,10 +285,8 @@ def test_serving():
         assert not http.get("/api/state", auth=auth).json()["dirty"] and ",Mystery\n" in db.PLAYLIST.read_text()
 
         assert http.patch("/api/channels", auth=auth, json={"ids": ["102"], "position": 0}).status_code == 400
-        assert http.put("/api/settings", auth=auth, json={
-            "playlist_url": "file:///etc/passwd", "upstream_url": "", "schedule": "24", "public_url": "",
-            "public_access": False,
-        }).status_code == 400
+        assert http.put("/api/settings", auth=auth, json={**settings, "playlist_url": "file:///etc/passwd"}).status_code == 400
+        assert http.put("/api/settings", auth=auth, json={**settings, "xtream_url": "file:///etc/passwd"}).status_code == 400
 
         # revoking a key cuts that user off; public access opens the plain URLs
         http.delete(f"/api/tokens/{token}", auth=auth)
@@ -246,9 +299,10 @@ def test_serving():
 
 
 if __name__ == "__main__":
-    server = HTTPServer(("127.0.0.1", 0), partial(SimpleHTTPRequestHandler, directory=WWW))
+    server = HTTPServer(("127.0.0.1", 0), partial(Provider, directory=WWW))
     threading.Thread(target=server.serve_forever, daemon=True).start()
     test_guide_only()
     test_playlist()
+    test_xtream()
     test_serving()
     print("ok")

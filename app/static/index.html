@@ -74,15 +74,22 @@
   .groups { position: sticky; top: 0; max-height: 100vh; overflow-y: auto; padding: 0 12px 24px 0; scrollbar-width: thin; }
   .groups h2 { font-size: 1.125rem; padding: 10px 0 6px; border-top: 3px solid var(--ink); }
   .groups ul { list-style: none; margin: 0; padding: 0; }
+  .groups > .field { margin-top: 10px; }
+  .check { display: flex; gap: 8px; align-items: center; }
+  .groups > .check { margin-top: 8px; }
+  .bulk { gap: 6px 8px; margin-top: 8px; }
+  .bulk .note { flex: 1 1 100%; }
+  .bulk .btn { padding: 3px 10px; }
   .groups .all, .groups li { display: grid; grid-template-columns: 16px 22px minmax(0, 1fr) auto; align-items: center; border-top: 1px solid var(--rule); }
   .groups .all { margin-top: 10px; border-top-color: var(--ink); font-weight: 650; }
   .groups li.drop, .groups li.ghost { background: var(--moving); }  /* a channel is about to land here, or the group is in the hand */
-  .pick { border: 0; background: none; padding: 6px 4px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
-  .pick:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .pick { border: 0; background: none; padding: 6px 4px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  button.pick { cursor: pointer; }
+  button.pick:hover { text-decoration: underline; text-underline-offset: 3px; }
   .pick[aria-pressed=true] { font-weight: 800; }
   .pick[aria-pressed=true]::before { content: ""; display: inline-block; width: .5em; height: .5em; margin-right: .45em; background: var(--red); }
   .groups .fig { color: var(--ink-soft); padding-left: 8px; }
-  #newGroup { flex-wrap: nowrap; gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--ink); }
+  #newGroup { flex-wrap: nowrap; gap: 8px; margin-top: 10px; }
   #newGroup .field { flex: 1; min-width: 0; }
 
   .tools { display: flex; align-items: center; gap: 10px 20px; flex-wrap: wrap; padding: 0 0 10px; }
@@ -142,8 +149,13 @@
   .source { display: grid; grid-template-columns: minmax(0, 560px) minmax(0, 1fr); gap: 20px 56px; align-items: start; }
   form.stack { display: grid; gap: 16px; }
   form.stack label { display: grid; gap: 4px; font-weight: 650; }
-  form.stack label.check { display: flex; gap: 10px; align-items: center; font-weight: 400; }
+  form.stack label.check { gap: 10px; font-weight: 400; }
+  form.stack .field { font-weight: 400; }  /* so an empty field's placeholder cannot pass for a value */
   form.stack small { font-weight: 400; font-size: 0.8125rem; color: var(--ink-soft); }
+  form.stack .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  form.stack summary { width: fit-content; color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  form.stack summary:hover { color: var(--ink); }
+  form.stack details[open] summary { margin-bottom: 12px; }
   .record h3 { font-size: 1.125rem; padding: 10px 0 8px; border-top: 3px solid var(--ink); }
   dl { margin: 0; }
   dl div { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; padding: 6px 0; border-top: 1px solid var(--rule); }
@@ -155,6 +167,7 @@
     .masthead h1 { font-size: 2rem; }
     .lineup, .source, .viewer { grid-template-columns: minmax(0, 1fr); }
     .groups { position: static; max-height: none; overflow: visible; margin-bottom: 20px; padding-right: 0; }
+    .groups ul { max-height: 55vh; overflow-y: auto; border-bottom: 1px solid var(--ink); }
     #edition { padding-inline: 0; }
     .sheet { overflow-x: auto; }
     .sheet > * { min-width: 866px; }
@@ -186,18 +199,21 @@
     <aside class="groups">
       <h2 class="head">Groups</h2>
       <p class="note">Players show groups in this order. Drag a group to move it, or drop a channel on one. A tick turns a whole group on or off.</p>
-      <div class="all"><span></span><span></span><button id="all" class="pick" type="button">All channels</button><span id="allFig" class="fig"></span></div>
-      <ul id="groups"></ul>
       <form id="newGroup" class="inline">
         <input class="field" type="text" name="name" placeholder="New group" aria-label="New group name" maxlength="80" required>
-        <button class="btn">Add group</button>
+        <button class="btn">Create group</button>
       </form>
+      <input id="gq" class="field" type="search" placeholder="Find a group" aria-label="Find a group">
+      <label class="check"><input id="onOnly" type="checkbox"> Only groups that are on</label>
+      <div class="inline bulk"><span id="listed" class="note"></span><button id="listedOn" class="btn" type="button" title="Turn on every channel in the listed groups">Turn on</button><button id="listedOff" class="btn" type="button" title="Turn off every channel in the listed groups">Turn off</button></div>
+      <div class="all"><span></span><span></span><span class="pick">All channels</span><span id="allFig" class="fig"></span></div>
+      <ul id="groups"></ul>
     </aside>
     <div>
       <div class="tools">
         <input id="q" class="field" type="search" placeholder="Find a channel by name or ID" aria-label="Find a channel by name or ID">
         <p id="count" class="note"></p>
-        <p class="note how">To move a channel, drag its grip into place or onto a group, type a new number in its box, or focus the grip and press the arrow keys.</p>
+        <p class="note how">One group is shown at a time. To move a channel, drag its grip into place or onto a group, type a new number in its box, or focus the grip and press the arrow keys.</p>
       </div>
       <form id="groupTools" class="tools" hidden>
         <input class="field" type="text" name="name" aria-label="Name of this group" maxlength="80" required>
@@ -210,7 +226,7 @@
         <ol id="list" class="ruled"></ol>
         <div id="empty" class="blank" hidden>
           <h3 class="head">No channels yet</h3>
-          <p>Add your provider's playlist address under <a href="#source">Source</a>, then press Sync now. Every channel is listed here in the provider's own groups, ready to drag into place. Channels that appear later join the end of their group.</p>
+          <p>Add your provider login under <a href="#source">Source</a>, then press Sync now. Every channel is listed here in the provider's own groups, ready to drag into place. Channels that appear later join the end of their group.</p>
         </div>
       </div>
     </div>
@@ -218,7 +234,7 @@
 
   <section id="view-viewers" class="view" hidden>
     <h2 class="head">Viewers</h2>
-    <p class="note">Each viewer gets addresses of their own. With a playlist published, add the playlist address in the player as an M3U playlist: it names that viewer's guide, so the TV guide should follow on its own. If a player does not pick it up, add the guide address too. Revoking a viewer cuts off that viewer only.</p>
+    <p class="note">Each viewer gets addresses of their own. In TiviMate choose Add playlist, then M3U playlist, and paste the viewer's playlist address. It names that viewer's guide, so the TV guide should follow on its own; if it does not, add the guide address as well. Revoking a viewer cuts off that viewer only.</p>
     <div id="viewers"></div>
     <form id="addUser" class="inline">
       <input class="field" type="text" name="label" placeholder="Name a viewer or device, e.g. Dad's Fire Stick" aria-label="New viewer or device name" maxlength="80" required>
@@ -231,12 +247,24 @@
     <h2 class="head">Source</h2>
     <div class="source" style="margin-top:16px">
       <form id="settings" class="stack">
-        <label>Playlist address (M3U)
-          <input class="field" type="url" name="playlist_url" placeholder="http://HOST:PORT/get.php?username=USER&amp;password=PASS&amp;type=m3u_plus&amp;output=ts">
-          <small>Where channels, their order and their groups come from. With an Xtream Codes login it is http://HOST:PORT/get.php?username=USER&amp;password=PASS&amp;type=m3u_plus&amp;output=ts. Live channels only; films and series are left out. Leave empty to edit a guide on its own.</small></label>
+        <label>Provider server
+          <input class="field" type="text" name="xtream_url" placeholder="http://line.example.com:8080" autocomplete="off" spellcheck="false">
+          <small>Your Xtream Codes login, as your provider gave it. GuideForge signs in with it to read your live channels and their groups; films and series are left out.</small></label>
+        <div class="pair">
+          <label>Username
+            <input class="field" type="text" name="xtream_user" autocomplete="off" spellcheck="false"></label>
+          <label>Password
+            <input class="field" type="text" name="xtream_pass" autocomplete="off" spellcheck="false"></label>
+        </div>
+        <details id="m3uSource">
+          <summary>My provider gave me an M3U link, not a login</summary>
+          <label>Playlist address (M3U)
+            <input class="field" type="url" name="playlist_url" placeholder="http://provider.example/playlist.m3u">
+            <small>Used only when the three fields above are empty.</small></label>
+        </details>
         <label>Guide address (XMLTV)
           <input class="field" type="url" name="upstream_url" placeholder="https://epg.example/guide.xml.gz">
-          <small>Your EPG supplier's link, or the provider's own at http://HOST:PORT/xmltv.php?username=USER&amp;password=PASS. Plain .xml or .xml.gz.</small></label>
+          <small>The link from your EPG supplier. Plain .xml or .xml.gz.</small></label>
         <label>Sync schedule
           <input class="field" type="text" name="schedule" placeholder="0 4 * * *" required>
           <small>A cron expression, such as 0 4 * * * for every day at 04:00, or a number of hours, such as 24. Nothing is fetched or published in between unless you press Sync now.</small></label>
@@ -272,9 +300,9 @@
     <span class="logo"></span>
     <input class="cell" type="text" data-f="name" aria-label="Display name">
     <input class="cell" type="text" data-f="lcn" inputmode="numeric" aria-label="Channel number (LCN)">
-    <input class="cell" type="text" data-f="tvg" list="guideIds" placeholder="no guide" aria-label="Guide ID: the guide channel this one takes its programmes from">
+    <input class="cell" type="text" data-f="tvg" data-list="guideIds" placeholder="no guide" aria-label="Guide ID: the guide channel this one takes its programmes from">
     <input class="cell" type="text" data-f="icon" aria-label="Logo address">
-    <input class="cell" type="text" data-f="grp" list="groupNames" aria-label="Group">
+    <input class="cell" type="text" data-f="grp" data-list="groupNames" aria-label="Group">
   </li>
 </template>
 
@@ -283,10 +311,13 @@
 const $ = (sel, el = document) => el.querySelector(sel);
 const list = $("#list"), index = $("#groups");
 const OVERRIDES = ["name", "lcn", "icon", "tvg"];
-let groupOrder = [];       // every group, in the order players show them
-let guideIds = new Set();  // channel ids the upstream guide has programmes for
-let playlist = false;      // the line-up is playlist streams, not a guide on its own
-let filterGroup = null;    // null = every group
+const SHOWN = 400;            // most rows a search puts on the page
+let groupOrder = [];          // every group, in the order players show them
+const members = new Map();    // group name -> its channels, in player order
+let current = null;           // the group being read
+let total = 0;                // channels in the whole line-up
+let guideIds = new Set();     // channel ids the upstream guide has programmes for
+let playlist = false;         // the line-up is playlist streams, not a guide on its own
 let wasRunning = null, lastBuilt, editionKey, viewersKey = "", settingsLoaded = false, loaded = false;
 
 async function api(method, path, body) {
@@ -332,7 +363,7 @@ route();
 async function refresh() {
   const s = await api("GET", "/state");
   const st = s.status, edition = $("#edition");
-  const configured = !!(s.settings.playlist_url || s.settings.upstream_url);
+  const configured = !!(s.settings.xtream_url || s.settings.playlist_url || s.settings.upstream_url);
   const standing = st.built_at ? ` Players still get the edition published ${when(st.built_at)}.` : "";
   let text, stop = true, address = false;
   if (s.running) text = "Stop press: fetching upstream and publishing";
@@ -349,7 +380,7 @@ async function refresh() {
   }
   if (editionKey !== text + address) {  // a live region: touch it only when it has something new to say
     editionKey = text + address;
-    edition.replaceChildren(text, ...(address ? [" ", el("a", {href: "#source", textContent: "Check the addresses under Source"}), "."] : []));
+    edition.replaceChildren(text, ...(address ? [" ", el("a", {href: "#source", textContent: "Check your details under Source"}), "."] : []));
   }
   edition.classList.toggle("stop", stop);
   if (lastBuilt !== undefined && st.built_at !== lastBuilt) {  // a new edition landed: one flash of fresh ink
@@ -372,6 +403,7 @@ async function refresh() {
       const input = $("#settings").elements[k];
       input.type === "checkbox" ? input.checked = v : input.value = v;
     }
+    $("#m3uSource").open = !!s.settings.playlist_url;
     settingsLoaded = true;
   }
   renderViewers(s);
@@ -423,8 +455,9 @@ $("#syncBtn").onclick = () => api("POST", "/sync").then(refresh, fail);
 $("#settings").onsubmit = e => {
   e.preventDefault();
   const f = e.target.elements;
-  api("PUT", "/settings", {playlist_url: f.playlist_url.value, upstream_url: f.upstream_url.value, schedule: f.schedule.value, public_url: f.public_url.value, public_access: f.public_access.checked})
-    .then(() => { $("#saved").textContent = "Saved. New addresses are fetched at the next sync."; setTimeout(() => $("#saved").textContent = "", 4000); return refresh(); }, fail);
+  api("PUT", "/settings", {xtream_url: f.xtream_url.value, xtream_user: f.xtream_user.value, xtream_pass: f.xtream_pass.value,
+    playlist_url: f.playlist_url.value, upstream_url: f.upstream_url.value, schedule: f.schedule.value, public_url: f.public_url.value, public_access: f.public_access.checked})
+    .then(saved => { f.xtream_url.value = saved.xtream_url; $("#saved").textContent = "Saved. Press Sync now to fetch and publish."; setTimeout(() => $("#saved").textContent = "", 5000); return refresh(); }, fail);
 };
 $("#addUser").onsubmit = e => {
   e.preventDefault();
@@ -432,9 +465,11 @@ $("#addUser").onsubmit = e => {
 };
 
 // ---- line-up editor ------------------------------------------------------
-// The list is always in player order: gathered by group, groups in index order.
+// Channels are held as data, by group. Only the group being read, or a capped set of search
+// results, is put on the page: a provider can list 50,000 channels, and a page cannot hold them.
 const patch = (ids, fields) => api("PATCH", "/channels", {ids, ...fields}).then(refresh, fail);
 const label = name => name || "No group";
+const query = () => $("#q").value.trim().toLowerCase();
 
 function paint(li) {
   const c = li.c;
@@ -446,138 +481,196 @@ function paint(li) {
     input.classList.toggle("edited", c[f] != null);
     input.title = c[f] != null ? `Upstream: ${up || "nothing"}. Clear this field to go back to it.` : "";
   }
-  li.classList.toggle("noguide", playlist && guideIds.size > 0 && !guideIds.has(c.tvg ?? c.up_tvg ?? ""));
+  li.classList.toggle("noguide", playlist && guideIds.size > 0 && !guideIds.has((c.tvg ?? c.up_tvg ?? "").toLowerCase()));
   const src = c.icon || c.up_icon || "";
   if ((li.logo.firstChild?.getAttribute("src") ?? "") !== src)  // a logo that fails to load removes itself
     li.logo.replaceChildren(...(src ? [el("img", {alt: "", loading: "lazy", referrerPolicy: "no-referrer", src, onerror() { this.remove(); }})] : []));
 }
 
+function row(c) {
+  const li = $("#rowT").content.firstElementChild.cloneNode(true);
+  Object.assign(li, {c, pos: $(".pos", li), on: $(".on", li), logo: $(".logo", li), fields: {}});
+  for (const input of li.querySelectorAll("[data-f]")) li.fields[input.dataset.f] = input;
+  li.dataset.id = c.id;
+  li.fields.tvg.readOnly = !playlist;  // on its own, a guide channel's id is not ours to change: players match on it
+  li.fields.grp.value = c.grp;
+  if (!c.present) {
+    li.classList.add("gone");
+    li.title = "No longer in the upstream source. Kept in its place in case it returns.";
+    li.fields.name.setAttribute("aria-label", "Display name (no longer in the upstream source)");
+  }
+  paint(li);
+  return li;
+}
+const focusRow = (c, sel) => {
+  const li = [...list.children].find(shown => shown.c === c);
+  if (li) { li.scrollIntoView({block: "center"}); $(sel, li).focus(); }
+};
+
 async function loadChannels() {
   const data = await api("GET", "/channels");
   groupOrder = data.groups;
-  guideIds = new Set(data.guide.map(([id]) => id));
+  members.clear();
+  for (const name of groupOrder) members.set(name, []);
+  for (const c of data.channels) {
+    if (!members.has(c.grp)) { members.set(c.grp, []); groupOrder.push(c.grp); }
+    members.get(c.grp).push(c);
+    c.saved = c.grp;  // the group the server has for it
+  }
+  total = data.channels.length;
+  guideIds = new Set(data.guide.map(([id]) => id.toLowerCase()));  // players and GuideForge match ids whatever their case
   playlist = data.channels.some(c => c.stream);
   $("#guideIds").replaceChildren(...(playlist ? data.guide.map(([id, name]) => el("option", {value: id, label: name ?? ""})) : []));
-  list.replaceChildren(...data.channels.map(c => {
-    const li = $("#rowT").content.firstElementChild.cloneNode(true);
-    Object.assign(li, {c, saved: c.grp, pos: $(".pos", li), on: $(".on", li), logo: $(".logo", li), fields: {}});
-    for (const input of li.querySelectorAll("[data-f]")) li.fields[input.dataset.f] = input;
-    li.dataset.id = c.id;
-    li.fields.tvg.readOnly = !playlist;  // on its own, a guide channel's id is not ours to change: players match on it
-    li.fields.grp.value = c.grp;
-    if (!c.present) {
-      li.classList.add("gone");
-      li.title = "No longer in the upstream source. Kept in its place in case it returns.";
-      li.fields.name.setAttribute("aria-label", "Display name (no longer in the upstream source)");
-    }
-    paint(li);
-    return li;
-  }));
+  if (!members.has(current)) current = groupOrder.find(name => members.get(name).length) ?? groupOrder[0] ?? null;
   loaded = true;
   renderGroups();
+  show();
 }
 
+// The index of groups, and the tools for the group being read.
+let namesKey;
 function renderGroups() {
-  const tally = new Map(groupOrder.map(name => [name, {total: 0, on: 0}]));
-  let on = 0;
-  for (const {c} of list.children) {
-    if (!tally.has(c.grp)) { tally.set(c.grp, {total: 0, on: 0}); groupOrder.push(c.grp); }
-    const g = tally.get(c.grp);
-    g.total++; g.on += c.enabled; on += c.enabled;
-  }
-  if (filterGroup !== null && !tally.has(filterGroup)) filterGroup = null;
+  const find = $("#gq").value.trim().toLowerCase(), onOnly = $("#onOnly").checked;
+  let on = 0, listed = 0;
   index.replaceChildren(...groupOrder.map(name => {
-    const g = tally.get(name), mixed = g.on > 0 && g.on < g.total;
-    const grip = el("button", {className: "ghandle", type: "button", title: "Drag to move this group. Keyboard: arrow keys."});
+    const group = members.get(name);
+    let enabled = 0;
+    for (const c of group) enabled += c.enabled;
+    on += enabled;
+    const mixed = enabled > 0 && enabled < group.length;
+    const grip = el("button", {className: "ghandle", type: "button", title: "Drag to move this group. Keyboard: arrow keys, Home, End."});
     grip.setAttribute("aria-label", `Move ${label(name)}: drag, or press the arrow keys`);
-    const box = el("input", {type: "checkbox", checked: g.total > 0 && g.on === g.total, indeterminate: mixed, disabled: !g.total, onchange() {
-      if (mixed && !confirm(`${label(name)} has ${num(g.on)} channels on and ${num(g.total - g.on)} off. Turn all ${num(g.total)} ${box.checked ? "on" : "off"}?`))
+    const box = el("input", {type: "checkbox", checked: group.length > 0 && enabled === group.length, indeterminate: mixed, disabled: !group.length, onchange() {
+      if (mixed && !confirm(`${label(name)} has ${num(enabled)} channels on and ${num(group.length - enabled)} off. Turn all ${num(group.length)} ${box.checked ? "on" : "off"}?`))
         return renderGroups();
-      const members = [...list.children].filter(li => li.c.grp === name);
-      for (const li of members) { li.c.enabled = box.checked; paint(li); }
+      for (const c of group) c.enabled = box.checked;
+      patch(group.map(c => c.id), {enabled: box.checked});
       renderGroups();
-      patch(members.map(li => li.dataset.id), {enabled: box.checked});
+      show();
     }});
     box.setAttribute("aria-label", `Enable every channel in ${label(name)}`);
-    const pick = el("button", {className: "pick", type: "button", textContent: label(name), title: label(name), onclick() { filterGroup = name; renderGroups(); }});
-    pick.setAttribute("aria-pressed", filterGroup === name);
-    const li = el("li", {}, grip, box, pick, el("span", {className: "fig", textContent: `${num(g.on)}/${num(g.total)}`}));
+    const pick = el("button", {className: "pick", type: "button", textContent: label(name), title: label(name), onclick() {
+      current = name;
+      $("#q").value = "";
+      renderGroups();
+      show();
+    }});
+    pick.setAttribute("aria-pressed", current === name);
+    const li = el("li", {}, grip, box, pick, el("span", {className: "fig", textContent: `${num(enabled)}/${num(group.length)}`}));
     li.dataset.name = name;
+    li.hidden = !label(name).toLowerCase().includes(find) || (onOnly && !enabled);  // filtered out, but still in its place in the order
+    listed += !li.hidden;
     return li;
   }));
-  $("#all").setAttribute("aria-pressed", filterGroup === null);
-  $("#allFig").textContent = `${num(on)}/${num(list.children.length)}`;
-  $("#groupNames").replaceChildren(...groupOrder.filter(Boolean).map(name => el("option", {value: name})));
-
+  $("#listed").textContent = listed === groupOrder.length ? `All ${num(listed)} groups` : `${num(listed)} of ${num(groupOrder.length)} groups listed`;
+  $("#allFig").textContent = `${num(on)}/${num(total)}`;
+  const names = groupOrder.filter(Boolean);
+  if (names.join("\n") !== namesKey) {
+    namesKey = names.join("\n");
+    $("#groupNames").replaceChildren(...names.map(name => el("option", {value: name})));
+  }
   const tools = $("#groupTools");  // rename and remove act on the group being read
-  tools.hidden = filterGroup === null;
-  if (filterGroup === null) delete tools.dataset.group;
-  else {
-    if (tools.dataset.group !== filterGroup) { tools.dataset.group = filterGroup; tools.elements.name.value = filterGroup; }
-    const empty = !tally.get(filterGroup).total;
-    $("#removeGroup").disabled = !empty;
-    $("#removeWhy").textContent = empty ? "" : "A group can be removed once it is empty.";
-  }
-  layout();
+  if (current === null) return void (tools.hidden = true);
+  if (tools.dataset.group !== current) { tools.dataset.group = current; tools.elements.name.value = current; }
+  const empty = !members.get(current).length;
+  $("#removeGroup").disabled = !empty;
+  $("#removeWhy").textContent = empty ? "" : "A group can be removed once it is empty.";
 }
-$("#all").onclick = () => { filterGroup = null; renderGroups(); };
 
-// One pass over the rows: filter, renumber, and set a section head on the first row of each group.
-function layout() {
-  const q = $("#q").value.trim().toLowerCase(), total = list.children.length;
-  let n = 0, shown = 0, head = null, run = 0;
-  const close = () => { if (head) head.dataset.count = run === 1 ? "1 channel" : `${num(run)} channels`; };
-  for (const li of list.children) {
-    const c = li.c;
-    if (li.pos.value !== String(++n) && document.activeElement !== li.pos) li.pos.value = n;
-    const hit = (filterGroup === null || c.grp === filterGroup)
-      && (!q || `${c.id} ${c.name ?? ""} ${c.up_name ?? ""} ${c.tvg ?? c.up_tvg ?? ""}`.toLowerCase().includes(q));
-    li.hidden = !hit;
-    if (!hit) continue;
-    const starts = !head || head.c.grp !== c.grp;
-    li.classList.toggle("run", starts);
-    li.classList.toggle("lead", shown === 0);
-    if (starts) { close(); head = li; run = 0; li.dataset.run = label(c.grp); }
-    run++; shown++;
+// Put the group being read, or the search results, on the page.
+function show() {
+  const q = query();
+  let rows = members.get(current) ?? [], found = 0;
+  if (q) {
+    rows = [];
+    for (const name of groupOrder) for (const c of members.get(name))
+      if (`${c.id} ${c.name ?? ""} ${c.up_name ?? ""} ${c.tvg ?? c.up_tvg ?? ""}`.toLowerCase().includes(q) && ++found <= SHOWN) rows.push(c);
   }
-  close();
+  list.replaceChildren(...rows.map(row));
+  heads();
   list.classList.toggle("ruled", !loaded);
-  $(".how").hidden = !total;
+  $("#groupTools").hidden = current === null || !!q;
+  $(".how").hidden = !rows.length;
   $("#empty").hidden = !loaded || total > 0;
   $("#count").textContent = !total ? ""
-    : !shown && filterGroup !== null && !q ? "No channels in this group yet. Choose All channels, then drop one on its name."
-    : shown === total ? `${num(total)} channels` : `${num(shown)} of ${num(total)} channels shown`;
+    : q ? (found > SHOWN ? `Showing the first ${num(SHOWN)} of ${num(found)} matches. Type more to narrow it down.` : `${num(found)} of ${num(total)} channels match`)
+    : rows.length ? "" : "No channels in this group yet. Drop one on its name, or choose this group in a channel's Group field.";
 }
-$("#q").oninput = layout;
+$("#q").oninput = show;
+$("#gq").oninput = $("#onOnly").onchange = renderGroups;
+function turnListed(on) {  // every channel in the groups the index is listing
+  const groups = [...index.children].filter(li => !li.hidden).map(li => members.get(li.dataset.name));
+  const channels = groups.flat().filter(c => !!c.enabled !== on);
+  if (!channels.length || !confirm(`Turn ${on ? "on" : "off"} ${num(channels.length)} channels in the ${num(groups.length)} listed groups?`)) return;
+  for (const c of channels) c.enabled = on;
+  patch(channels.map(c => c.id), {enabled: on});
+  renderGroups();
+  show();
+}
+$("#listedOn").onclick = () => turnListed(true);
+$("#listedOff").onclick = () => turnListed(false);
+
+// Number the rows by their place in their group, and print a section head above the first row of each group.
+function heads() {
+  const searching = !!query();
+  let head = null, run = 0, n = 0;
+  const close = () => { if (head) head.dataset.count = run === 1 ? "1 channel" : `${num(run)} channels`; };
+  for (const li of list.children) {
+    const c = li.c, at = searching ? (members.get(c.grp).indexOf(c) + 1) || "" : ++n;
+    if (li.pos.value !== String(at) && document.activeElement !== li.pos) li.pos.value = at;
+    const starts = !head || head.c.grp !== c.grp;
+    li.classList.toggle("run", starts);
+    li.classList.toggle("lead", li === list.firstElementChild);
+    if (starts) { close(); head = li; run = 0; li.dataset.run = label(c.grp); }
+    run++;
+  }
+  close();
+}
+
+// A group's order is saved on its own: positions only mean something inside a group.
+const unsaved = new Set();
+let orderTimer, groupTimer;
+function saveOrder(name) {
+  unsaved.add(name);
+  clearTimeout(orderTimer);
+  orderTimer = setTimeout(() => {
+    for (const group of unsaved) if (members.has(group)) api("PUT", "/channels/order", members.get(group).map(c => c.id)).then(refresh, fail);
+    unsaved.clear();
+  }, 400);
+}
+function saveGroups() {
+  groupOrder = [...index.children].map(li => li.dataset.name);
+  clearTimeout(groupTimer);
+  groupTimer = setTimeout(() => api("PUT", "/groups", groupOrder).then(refresh, fail), 300);
+  if (query()) show();  // search results follow the group order
+}
 
 // A row that lands beside a row of another group joins that group.
 function adopt(li, other) {
   if (other?.c && other !== li && other.c.grp !== li.c.grp) li.c.grp = li.fields.grp.value = other.c.grp;
 }
-// Hidden (filtered-out) rows stay in the DOM, so the DOM order is always the full line-up.
-let orderTimer;
-function commit(li) {  // save where a row ended up
-  clearTimeout(orderTimer);
-  orderTimer = setTimeout(() => api("PUT", "/channels/order", [...list.children].map(row => row.dataset.id)).then(refresh, fail), 400);
-  if (li.c.grp !== li.saved) patch([li.dataset.id], {grp: li.saved = li.c.grp});
+// Bring the data in line with where a row now sits on the page, and save it.
+function commit(li) {
+  const c = li.c, from = members.get(c.saved), to = members.get(c.grp);
+  from.splice(from.indexOf(c), 1);
+  const before = li.previousElementSibling, after = li.nextElementSibling;
+  if (before?.c.grp === c.grp) to.splice(to.indexOf(before.c) + 1, 0, c);
+  else if (after?.c.grp === c.grp) to.splice(to.indexOf(after.c), 0, c);
+  else to.push(c);
+  saveOrder(c.grp);
+  if (c.grp !== c.saved) patch([c.id], {grp: c.saved = c.grp});
   renderGroups();
+  heads();
 }
-function regroup() {  // put the rows back in group order; stable, so order inside a group survives
-  const at = new Map(groupOrder.map((name, i) => [name, i]));
-  list.replaceChildren(...[...list.children].sort((a, b) => at.get(a.c.grp) - at.get(b.c.grp)));
+function moveToGroup(c, name) {  // to the end of another group
+  if (!members.has(name)) { members.set(name, []); groupOrder.push(name); }
+  const from = members.get(c.saved);
+  from.splice(from.indexOf(c), 1);
+  members.get(name).push(c);
+  saveOrder(name);
+  patch([c.id], {grp: c.grp = c.saved = name});
   renderGroups();
-}
-function moveToGroup(li, name) {
-  if (!groupOrder.includes(name)) groupOrder.push(name);
-  li.c.grp = li.fields.grp.value = name;
-  list.append(li);  // regroup is stable, so the row lands at the end of its new group
-  regroup();
-  commit(li);
-}
-function saveGroups() {
-  groupOrder = [...index.children].map(li => li.dataset.name);
-  api("PUT", "/groups", groupOrder).then(refresh, fail);
-  regroup();
+  show();
 }
 
 // Dragging a channel: within the list, or onto a group in the index.
@@ -591,14 +684,14 @@ const easing = "cubic-bezier(.16, 1, .3, 1)";
 new Sortable(list, {
   handle: ".handle", animation: motion, easing, ghostClass: "ghost", fallbackOnBody: true, scrollSensitivity: 90, scrollSpeed: 18,
   onMove(e) { over = e.related; },
-  onChange(e) { adopt(e.item, over); layout(); },  // section heads re-set while the row is still in the hand
+  onChange(e) { adopt(e.item, over); heads(); },  // section heads re-set while the row is still in the hand
   onEnd(e) {
     const point = e.originalEvent?.changedTouches?.[0] ?? e.originalEvent;  // touch has no dragover, so look under the finger
     const under = point && document.elementFromPoint(point.clientX, point.clientY)?.closest("#groups li");
     const target = dropGroup ?? under?.dataset.name ?? null;
     over = null;
     markDrop(null);
-    target === null ? commit(e.item) : moveToGroup(e.item, target);
+    target === null ? commit(e.item) : moveToGroup(e.item.c, target);
   },
 });
 index.addEventListener("dragover", e => {
@@ -611,25 +704,25 @@ index.addEventListener("dragleave", e => { if (!index.contains(e.relatedTarget))
 list.addEventListener("dragover", () => { if (dropGroup !== null) markDrop(null); });
 new Sortable(index, {handle: ".ghandle", animation: motion, easing, ghostClass: "ghost", onEnd: saveGroups});
 
+// A datalist updates every field that points at it, so only the field being edited points at one.
+list.addEventListener("focusin", e => { if (e.target.dataset.list) e.target.setAttribute("list", e.target.dataset.list); });
+list.addEventListener("focusout", e => { if (e.target.dataset.list) e.target.removeAttribute("list"); });
+
 list.addEventListener("change", e => {
   if (!e.target.matches("input")) return;  // SortableJS also fires an event named "change" on the list while dragging
   const input = e.target, li = input.closest("li"), c = li.c;
-  if (input === li.pos) {  // type a position to move the channel there
-    const rows = list.children, from = [...rows].indexOf(li) + 1;
-    const to = Math.min(Math.max(parseInt(input.value, 10) || from, 1), rows.length);
-    input.value = to;
-    if (to !== from) {
-      const target = rows[to - 1];
-      to > from ? target.after(li) : target.before(li);
-      adopt(li, target);
-      commit(li);
-      li.scrollIntoView({block: "center"});
-      input.focus();
-    }
-    return;
+  if (input === li.pos) {  // type a position to move the channel there, within its group
+    const group = members.get(c.grp), from = group.indexOf(c) + 1;
+    const to = Math.min(Math.max(parseInt(input.value, 10) || from, 1), group.length);
+    if (to === from) return void (input.value = from);
+    group.splice(from - 1, 1);
+    group.splice(to - 1, 0, c);
+    saveOrder(c.grp);
+    show();
+    return focusRow(c, ".pos");
   }
   const f = input.dataset.f, value = input.value.trim();
-  if (f === "grp") return value === c.grp ? void (input.value = value) : moveToGroup(li, value);
+  if (f === "grp") return value === c.grp ? void (input.value = value) : moveToGroup(c, value);
   if (input === li.on) {
     c.enabled = input.checked;
     patch([c.id], {enabled: c.enabled});
@@ -641,16 +734,21 @@ list.addEventListener("change", e => {
   renderGroups();
 });
 
-// Keyboard alternative to dragging. Stepping past the edge of a group crosses into the next one.
+// Keyboard alternative to dragging. In search results, stepping past the edge of a group crosses into the next one.
 list.addEventListener("keydown", e => {
   if (!e.target.matches(".handle")) return;
-  const li = e.target.closest("li");
-  const visible = dir => { let s = li[dir]; while (s && s.hidden) s = s[dir]; return s; };
-  const step = (other, place) => { if (other && other.c.grp === li.c.grp) place(other); else adopt(li, other); };
-  if (e.key === "ArrowUp") step(visible("previousElementSibling"), other => other.before(li));
-  else if (e.key === "ArrowDown") step(visible("nextElementSibling"), other => other.after(li));
-  else if (e.key === "Home") { adopt(li, list.firstElementChild); list.prepend(li); }
-  else if (e.key === "End") { adopt(li, list.lastElementChild); list.append(li); }
+  const li = e.target.closest("li"), c = li.c, before = li.previousElementSibling, after = li.nextElementSibling;
+  if (e.key === "Home" || e.key === "End") {  // to the top or bottom of its group
+    const group = members.get(c.grp);
+    group.splice(group.indexOf(c), 1);
+    e.key === "Home" ? group.unshift(c) : group.push(c);
+    saveOrder(c.grp);
+    show();
+    e.preventDefault();
+    return focusRow(c, ".handle");
+  }
+  if (e.key === "ArrowUp" && before) before.c.grp === c.grp ? before.before(li) : adopt(li, before);
+  else if (e.key === "ArrowDown" && after) after.c.grp === c.grp ? after.after(li) : adopt(li, after);
   else return;
   e.preventDefault();
   commit(li);
@@ -658,12 +756,18 @@ list.addEventListener("keydown", e => {
   li.scrollIntoView({block: "nearest"});
 });
 index.addEventListener("keydown", e => {
-  if (!e.target.matches(".ghandle") || !["ArrowUp", "ArrowDown"].includes(e.key)) return;
-  const li = e.target.closest("li"), name = li.dataset.name;
-  e.key === "ArrowUp" ? li.previousElementSibling?.before(li) : li.nextElementSibling?.after(li);
+  if (!e.target.matches(".ghandle")) return;
+  const li = e.target.closest("li");
+  const listed = dir => { let other = li[dir]; while (other?.hidden) other = other[dir]; return other; };  // step over filtered-out groups
+  if (e.key === "ArrowUp") listed("previousElementSibling")?.before(li);
+  else if (e.key === "ArrowDown") listed("nextElementSibling")?.after(li);
+  else if (e.key === "Home") index.prepend(li);
+  else if (e.key === "End") index.append(li);
+  else return;
   e.preventDefault();
-  saveGroups();  // redraws the index, so find the group's grip again
-  $(".ghandle", [...index.children].find(row => row.dataset.name === name)).focus();
+  saveGroups();
+  e.target.focus();
+  li.scrollIntoView({block: "nearest"});
 });
 
 $("#newGroup").onsubmit = e => {
@@ -671,7 +775,8 @@ $("#newGroup").onsubmit = e => {
   const name = e.target.elements.name.value.trim();
   if (!name) return;
   e.target.reset();
-  if (!groupOrder.includes(name)) {
+  if (!members.has(name)) {
+    members.set(name, []);
     groupOrder.unshift(name);  // first, where it can be seen and where a group made by hand usually belongs
     api("PUT", "/groups", groupOrder).then(refresh, fail);
     renderGroups();
@@ -680,22 +785,30 @@ $("#newGroup").onsubmit = e => {
 };
 $("#groupTools").onsubmit = e => {
   e.preventDefault();
-  const old = filterGroup, name = e.target.elements.name.value.trim();
+  const old = current, name = e.target.elements.name.value.trim();
   if (!name || name === old) return;
-  if (groupOrder.includes(name) && !confirm(`${name} already exists. Move every channel from ${label(old)} into it?`)) return;
+  if (members.has(name) && !confirm(`${name} already exists. Move every channel from ${label(old)} into it?`)) return;
   api("POST", "/groups/rename", {old, new: name}).then(order => {
-    for (const li of list.children) if (li.c.grp === old) li.c.grp = li.saved = li.fields.grp.value = name;
+    const moved = members.get(old);
+    for (const c of moved) c.grp = c.saved = name;
+    members.set(name, [...(members.get(name) ?? []), ...moved]);
+    members.delete(old);
     groupOrder = order;
-    filterGroup = name;
-    regroup();
+    current = name;
+    saveOrder(name);  // after a merge the two groups' channels need one order between them
+    renderGroups();
+    show();
     return refresh();
   }, fail);
 };
 $("#removeGroup").onclick = () => {
-  groupOrder = groupOrder.filter(name => name !== filterGroup);
-  filterGroup = null;
+  const at = groupOrder.indexOf(current);
+  members.delete(current);
+  groupOrder.splice(at, 1);
+  current = groupOrder[at] ?? groupOrder[at - 1] ?? null;
   api("PUT", "/groups", groupOrder).then(refresh, fail);
   renderGroups();
+  show();
 };
 
 refresh().then(loadChannels).catch(fail);

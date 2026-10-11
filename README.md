@@ -7,7 +7,7 @@ A self-hosted editor for what your IPTV players show: which channels, in which g
 Players such as TiviMate take channels, their order and their groups from the **playlist**, never from the guide. So GuideForge sits between your provider and your players for both:
 
 ```
-provider playlist (M3U)  ─┐                    ┌─  /u/<key>/playlist.m3u  ─┐
+provider (Xtream login)  ─┐                    ┌─  /u/<key>/playlist.m3u  ─┐
                           ├─  GuideForge  ─────┤                           ├─  TiviMate
 EPG supplier (XMLTV)     ─┘   your line-up     └─  /u/<key>/epg.xml.gz    ─┘
 ```
@@ -22,12 +22,11 @@ docker compose up -d
 ```
 
 1. Open `http://<host>:8000` and sign in (any username, the admin password).
-2. Under **Source**, paste your playlist address and your guide address, and save.
-   - With an Xtream Codes login the playlist is `http://HOST:PORT/get.php?username=USER&password=PASS&type=m3u_plus&output=ts`.
-   - The guide is your EPG supplier's link, or the provider's own at `http://HOST:PORT/xmltv.php?username=USER&password=PASS`.
+2. Under **Source**, enter your provider's Xtream Codes login (server, username, password) and the guide address from your EPG supplier, and save.
+   - If your provider gave you an M3U link instead of a login, open "My provider gave me an M3U link" and paste it there.
 3. Press **Sync now**. Your channels appear under **Line-up** in the provider's groups.
 4. Arrange them, then press **Sync now** again to publish.
-5. Under **Viewers**, copy a playlist address and add it in TiviMate as an **M3U playlist** (not an Xtream Codes login). The playlist names that viewer's guide address, so the TV guide should follow on its own; if your player does not pick it up, add the guide address as well.
+5. Under **Viewers**, copy a playlist address. In TiviMate choose Add playlist, then **M3U playlist**, and paste it. Do not enter your provider's Xtream login in TiviMate: that would bypass GuideForge and show the provider's own groups. The playlist names that viewer's guide address, so the TV guide should follow on its own; if your player does not pick it up, add the guide address as well.
 
 ## When things are fetched and published
 
@@ -38,10 +37,11 @@ If a download fails during a sync, your waiting edits are still published from t
 ## Arranging the line-up
 
 - **Groups** are listed in the order players show them. Drag a group to move it, add new ones, rename or merge them, and remove empty ones.
-- **Channels** move by dragging the grip, by typing a position into the number box, or with the arrow keys on the grip. Dragging a channel across a section head, or dropping it on a group in the index, moves it into that group.
+- **Big providers.** Type in "Find a group" to narrow the index, or tick "Only groups that are on". "Turn on" and "Turn off" act on every group currently listed, after asking. A quick way to start from a provider with hundreds of groups: Turn off with nothing typed, then find the ones you want (for example `UK|`) and Turn on.
+- **Channels** are shown one group at a time; click a group's name to read it. They move by dragging the grip, by typing a position into the number box, or with the arrow keys on the grip. Dropping a channel on a group in the index moves it into that group. Searching looks across every group and shows the first 400 matches.
 - A tick turns a channel, or a whole group, on or off. A channel that later appears in a group you switched off entirely stays off.
 - Display name, channel number (LCN) and logo can be overridden per channel. Clear a field to go back to the provider's value.
-- **Guide ID** is the guide channel a stream takes its programmes from. A stream the guide cannot match is shown in red; pick the right guide channel from the list to fix it.
+- **Guide ID** is the guide channel a stream takes its programmes from. Ids are matched whatever their letter case. A stream the guide cannot match is shown in red; pick the right guide channel from the list to fix it.
 - New channels from the provider join the end of their group; new provider groups are added last.
 
 ## Addresses
@@ -61,7 +61,7 @@ Responses carry `ETag`, `Last-Modified` and `Access-Control-Allow-Origin: *`, an
 - **Everyone shares your provider login.** The playlist contains your provider's stream addresses, login included. Give it only to people you would give that login to; the provider's connection limit applies across all of them.
 - **Live channels only.** Film and series entries in the provider playlist are left out. An M3U playlist also gives TiviMate no film or series sections; if you want those, keep the Xtream Codes login as a second playlist in TiviMate.
 - **Without a playlist address** GuideForge edits the guide on its own, which trims and renames guide data but cannot change what a player lists.
-- **Stream ids survive a password change.** Channels are tracked by their Xtream stream number, so a new provider password does not reset your line-up.
+- **Your line-up survives a password change.** Channels are tracked by their Xtream stream number, so a new provider password, or a switch from an M3U link to the login, does not reset it.
 
 ## Reaching it from the internet
 
@@ -80,7 +80,8 @@ Set **Public address of this server** under Source so viewer addresses, and the 
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `ADMIN_PASSWORD` | random, printed at start | Password for the editor and its API. |
-| `PLAYLIST_URL` | empty | First-run playlist address. Saved settings win afterwards. |
+| `XTREAM_URL`, `XTREAM_USER`, `XTREAM_PASS` | empty | First-run provider login. Saved settings win afterwards. |
+| `PLAYLIST_URL` | empty | First-run M3U address, for a provider with no login. |
 | `UPSTREAM_URL` | empty | First-run guide address. |
 | `SYNC_SCHEDULE` | `0 4 * * *` | A five-field cron expression, or hours between syncs. |
 | `PUBLIC_URL` | empty | First-run public address of this server. |
@@ -93,7 +94,8 @@ Set **Public address of this server** under Source so viewer addresses, and the 
 | Module | Job |
 | --- | --- |
 | `app/ingest.py` | Stream a download to disk. |
-| `app/m3u.py` | Streaming M3U parser for provider playlists. |
+| `app/xtream.py` | Read live channels and groups through the provider's Xtream Codes API. |
+| `app/m3u.py` | Streaming M3U parser, for providers that give a playlist link instead. |
 | `app/xmltv.py` | Streaming XMLTV parser; memory stays flat whatever the guide size. |
 | `app/transform.py` | Apply the line-up; write the playlist and the gzipped guide. |
 | `app/db.py` | SQLite: channels, groups, guide channels, settings, viewer keys. |
