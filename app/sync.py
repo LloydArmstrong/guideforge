@@ -11,7 +11,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
-from . import db, ingest, m3u, publish, transform, xmltv
+from . import db, ingest, m3u, publish, transform, xmltv, xtream
 
 log = logging.getLogger(__name__)
 scheduler = BackgroundScheduler()
@@ -56,7 +56,13 @@ def _guide_row(channel):
     }
 
 
-def _refresh(guide_url, playlist_url):
+def sources():
+    """What is configured: (provider login or None, playlist address, guide address)."""
+    login = (xtream.server_root(db.get("xtream_url")), db.get("xtream_user"), db.get("xtream_pass"))
+    return (login if all(login) else None), db.get("playlist_url"), db.get("upstream_url")
+
+
+def _refresh(login, playlist_url, guide_url):
     """Download the configured sources and bring the channel list up to date."""
     guide = []
     if guide_url:
@@ -68,7 +74,12 @@ def _refresh(guide_url, playlist_url):
         tmp.replace(db.UPSTREAM)
         db.set_epg_channels(guide)
         _status(upstream_bytes=size)
-    if playlist_url:
+    if login:
+        entries = list(xtream.read_channels(*login))
+        if not entries:
+            raise ValueError("the provider lists no live channels for this login")
+        db.import_channels(entries, playlist=True)
+    elif playlist_url:
         tmp = db.PLAYLIST.with_suffix(".download")
         try:
             ingest.fetch(playlist_url, tmp)
@@ -115,12 +126,12 @@ def _build():
 
 def sync():
     """Fetch upstream, pick up new channels, and publish the playlist and guide."""
-    guide_url, playlist_url = db.get("upstream_url"), db.get("playlist_url")
-    if not (guide_url or playlist_url):
+    configured = sources()
+    if not any(configured):
         return
     with _job("sync"):
         try:
-            _refresh(guide_url, playlist_url)
+            _refresh(*configured)
         except Exception:
             if db.get("dirty"):  # a failed download must not hold the operator's edits back
                 _build()

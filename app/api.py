@@ -9,7 +9,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from pydantic import BaseModel, Field
 
-from . import db, publish, sync
+from . import db, publish, sync, xtream
 
 log = logging.getLogger(__name__)
 
@@ -31,6 +31,9 @@ router = APIRouter(prefix="/api", dependencies=[Depends(admin)])
 
 
 class Settings(BaseModel):
+    xtream_url: str
+    xtream_user: str
+    xtream_pass: str
     playlist_url: str
     upstream_url: str
     schedule: str
@@ -71,6 +74,9 @@ def state():
 @router.put("/settings")
 def save_settings(settings: Settings):
     new = {
+        "xtream_url": xtream.server_root(settings.xtream_url),
+        "xtream_user": settings.xtream_user.strip(),
+        "xtream_pass": settings.xtream_pass.strip(),
         "playlist_url": settings.playlist_url.strip(),
         "upstream_url": settings.upstream_url.strip(),
         "schedule": settings.schedule.strip(),
@@ -80,6 +86,9 @@ def save_settings(settings: Settings):
     for url in (new["playlist_url"], new["upstream_url"], new["public_url"]):
         if url and urlsplit(url).scheme not in ("http", "https"):
             raise HTTPException(400, "Addresses must start with http:// or https://")
+    login = [settings.xtream_url.strip(), new["xtream_user"], new["xtream_pass"]]
+    if any(login) and not (all(login) and new["xtream_url"]):
+        raise HTTPException(400, "A provider login needs all three: server address, username and password")
     try:
         sync.trigger(new["schedule"])
     except ValueError as e:
@@ -92,8 +101,8 @@ def save_settings(settings: Settings):
 
 @router.post("/sync", status_code=202)
 def sync_now():
-    if not (db.get("playlist_url") or db.get("upstream_url")):
-        raise HTTPException(400, "Add a playlist or guide address under Source first")
+    if not any(sync.sources()):
+        raise HTTPException(400, "Add your provider login or a guide address under Source first")
     sync.sync_now()
     return {}
 

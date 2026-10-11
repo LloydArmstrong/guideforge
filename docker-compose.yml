@@ -4,6 +4,9 @@ services:
     restart: unless-stopped
     environment:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD in .env}
+      XTREAM_URL: ${XTREAM_URL:-}
+      XTREAM_USER: ${XTREAM_USER:-}
+      XTREAM_PASS: ${XTREAM_PASS:-}
       PLAYLIST_URL: ${PLAYLIST_URL:-}
       UPSTREAM_URL: ${UPSTREAM_URL:-}
       SYNC_SCHEDULE: ${SYNC_SCHEDULE:-0 4 * * *}

@@ -27,6 +27,7 @@ The line-up is saved once and re-applied to every future upstream sync. Channels
 ## Operating Context
 
 - Upstream guides are large (50 MB and up, thousands of channels) and often slightly malformed.
+- Providers are large too: the owner's lists 56,774 live channels in 905 groups. The editor therefore holds channels as data and puts only one group, or a capped set of search results, on the page.
 - The guide is delivered over the open internet through a reverse proxy, a Cloudflare Tunnel, or an optional Cloudflare R2 mirror. Google Drive is explicitly not a distribution method.
 - Players take channels, their order and their groups from the playlist, never from the guide. That is why GuideForge serves the playlist.
 - Players match programmes to channels by id. A guide channel's id is never rewritten; each stream instead names the guide channel it takes programmes from.
@@ -35,9 +36,9 @@ The line-up is saved once and re-applied to every future upstream sync. Channels
 
 ## Capabilities and Constraints
 
-- Sources: an M3U playlist address (for an Xtream Codes login, its get.php link) and an XMLTV guide address. Live channels only; film and series entries are left out. With no playlist, the guide's own channels are the line-up and only a guide is published.
-- Channel editor: reordering by drag, by arrow keys, or by typing a position; per-channel enable, display name, channel number (LCN), logo address and guide id overrides. A stream whose guide id matches nothing in the guide is flagged.
-- Groups are first-class and ordered: they start as the provider's own, and can be created, renamed (or merged by renaming onto an existing name), reordered and, once empty, removed. A channel changes group by being dragged across a section head, dropped on a group in the index, or by its Group field. A whole group can be enabled or disabled at once (a group with mixed settings asks first); new channels arriving in a fully disabled group stay hidden. There is deliberately no control that enables or disables every channel at once.
+- Sources: the provider's Xtream Codes login (server, username, password), read through its player API, and an XMLTV guide address from an EPG supplier. A plain M3U playlist address is accepted instead for providers with no login. Live channels only; film and series entries are left out. With no playlist, the guide's own channels are the line-up and only a guide is published.
+- Channel editor: reordering by drag, by arrow keys, or by typing a position; per-channel enable, display name, channel number (LCN), logo address and guide id overrides. Guide ids are matched whatever their letter case and published the guide's way. A stream whose guide id matches nothing in the guide is flagged. There is no matching by channel name yet, so a stream the provider gives no guide id has no guide data until one is chosen by hand.
+- Groups are first-class and ordered: they start as the provider's own, and can be created, renamed (or merged by renaming onto an existing name), reordered and, once empty, removed. A channel changes group by being dragged across a section head, dropped on a group in the index, or by its Group field. A whole group can be enabled or disabled at once (a group with mixed settings asks first); new channels arriving in a fully disabled group stay hidden. The index can be narrowed by name or to groups that are on, and every listed group can be turned on or off together after a confirmation that states the count.
 - Distribution: per-viewer keys, each with a playlist address and a guide address per reachable base (local, public; the R2 mirror carries the guide only) and a copy action aimed at TiviMate. The playlist names the viewer's guide address, so a player needs only the one. Optional keyless public access.
 - Sync: scheduled by cron or interval, manual "Sync now", last and next sync time, guide size, channel, guide-match and programme counts, last error. If a download fails, edits that were waiting are still published from the last good download.
 - The editor is protected by a single admin password (HTTP Basic). It may be reached over plain HTTP on a LAN, where the clipboard API is unavailable.
@@ -56,7 +57,7 @@ No customers, testimonials or benchmarks exist and none may be invented. Real co
 1. The line-up is the product: the channel list gets the space, everything else supports it.
 2. Never surprise a running line-up: no silent reordering, no half-written file, nothing published by accident, and a failed sync keeps the last good edition.
 3. State is always legible: the operator can tell at a glance whether what players download matches what the editor shows.
-4. Thousands of rows are normal, not an edge case.
+4. Tens of thousands of channels and hundreds of groups are normal, not an edge case.
 
 ## Accessibility & Inclusion
 

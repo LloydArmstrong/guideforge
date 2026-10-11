@@ -30,6 +30,7 @@ CREATE INDEX IF NOT EXISTS channels_grp ON channels (grp, enabled);
 CREATE TABLE IF NOT EXISTS groups (name TEXT PRIMARY KEY, position INTEGER NOT NULL);
 -- The upstream guide's channels, replaced on every sync. A channel gets guide data when its tvg id matches one.
 CREATE TABLE IF NOT EXISTS epg_channels (id TEXT PRIMARY KEY, name TEXT, xml TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS epg_channels_lower ON epg_channels (lower(id));
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS tokens (token TEXT PRIMARY KEY, label TEXT NOT NULL, created TEXT NOT NULL);
 """
@@ -46,7 +47,10 @@ ALTER TABLE channels DROP COLUMN xml;
 
 # Env vars only seed first-run defaults; values saved from the UI win.
 DEFAULTS = {
-    "playlist_url": os.environ.get("PLAYLIST_URL", ""),
+    "xtream_url": os.environ.get("XTREAM_URL", ""),  # the provider's Xtream Codes server, e.g. http://host:8080
+    "xtream_user": os.environ.get("XTREAM_USER", ""),
+    "xtream_pass": os.environ.get("XTREAM_PASS", ""),
+    "playlist_url": os.environ.get("PLAYLIST_URL", ""),  # for providers with no Xtream login
     "upstream_url": os.environ.get("UPSTREAM_URL", ""),
     "schedule": os.environ.get("SYNC_SCHEDULE", "0 4 * * *"),
     "public_url": os.environ.get("PUBLIC_URL", "").rstrip("/"),
@@ -136,13 +140,20 @@ def channels():
 
 
 def layout():
-    """The channels to publish, in player order, each with its matching guide channel if there is one."""
+    """The channels to publish, in player order, each with its matching guide channel if there is one.
+
+    Providers and guides disagree about letter case ("Sport1.de" against "sport1.de"), so a guide
+    channel matches whatever its case, an exact match winning. `tvg` comes back spelled the
+    guide's way, so the published playlist and guide agree for any player.
+    """
     with connect() as con:
         rows = con.execute(
             "SELECT c.grp, c.url, c.extra, c.name, c.icon, c.lcn, e.xml,"
-            " COALESCE(c.tvg, c.up_tvg, '') AS tvg, COALESCE(c.name, c.up_name, '') AS shown_name,"
+            " COALESCE(e.id, c.tvg, c.up_tvg, '') AS tvg, COALESCE(c.name, c.up_name, '') AS shown_name,"
             " COALESCE(c.icon, c.up_icon, '') AS shown_icon, COALESCE(c.lcn, c.up_lcn, '') AS shown_lcn"
-            " FROM channels c LEFT JOIN epg_channels e ON e.id = COALESCE(c.tvg, c.up_tvg)"
+            " FROM channels c LEFT JOIN epg_channels e ON e.id = COALESCE("
+            "   (SELECT id FROM epg_channels WHERE id = COALESCE(c.tvg, c.up_tvg)),"
+            "   (SELECT id FROM epg_channels WHERE lower(id) = lower(COALESCE(c.tvg, c.up_tvg)) LIMIT 1))"
             f" {_GROUPS} WHERE c.enabled AND c.present {_PLAYER_ORDER}"
         )
         return [dict(r) for r in rows]
