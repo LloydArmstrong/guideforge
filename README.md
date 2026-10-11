@@ -68,8 +68,11 @@ Responses carry `ETag`, `Last-Modified` and `Access-Control-Allow-Origin: *`, an
 The app listens on port 8000 and serves both the editor and the feeds.
 
 - **Your own reverse proxy.** Proxy to `guideforge:8000`. To keep the editor off the internet, forward only `/playlist.m3u`, `/epg.xml*` and `/u/`.
-- **Bundled nginx** (`docker compose --profile nginx up -d`). Listens on port 80 and forwards only the feed paths; see `nginx.conf`. Terminate TLS in front of it.
-- **Cloudflare Tunnel** (`docker compose --profile tunnel up -d`, with `TUNNEL_TOKEN` in `.env`). Point the tunnel's public hostname at `http://nginx:80` for feeds only, or `http://guideforge:8000` for feeds and editor.
+- **Bundled nginx** (`docker compose --profile nginx up -d`). Listens on host port 8081 and forwards only the feed paths; see `nginx.conf`. Terminate TLS in front of it.
+- **Cloudflare Tunnel.** Nothing opens on your router: the tunnel is a connection your machine makes outward. Run the bundled nginx, then publish it through the tunnel so only the feeds are reachable:
+  - If you installed `cloudflared` on the host with Cloudflare's install command, set the published application's Service URL to `http://localhost:8081`.
+  - If you would rather run it in Docker, put `TUNNEL_TOKEN` in `.env`, add `--profile tunnel`, and use `http://nginx:80`.
+  - Use one or the other, not both. Never point a tunnel at port 8000: that is the editor.
 
 Set **Public address of this server** under Source so viewer addresses, and the guide address inside each playlist, use your hostname.
 
