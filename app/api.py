@@ -62,6 +62,7 @@ def state():
         "settings": {key: db.get(key) for key in Settings.model_fields},
         "status": db.get("status"),
         "running": sync.state["running"],
+        "progress": sync.state["progress"],
         "dirty": db.get("dirty"),
         "playlist": db.PLAYLIST.exists(),
         "guide": db.OUTPUT.exists(),

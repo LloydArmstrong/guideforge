@@ -15,7 +15,9 @@ from . import db, ingest, m3u, publish, transform, xmltv, xtream
 
 log = logging.getLogger(__name__)
 scheduler = BackgroundScheduler()
-state = {"running": None}  # in-process, which is why the app runs a single worker
+# What a sync is doing right now, in words the edition line prints after "Stop press:", and the bytes
+# of the download in hand as (done, total). In-process, which is why the app runs a single worker.
+state = {"running": None, "progress": None}
 _lock = threading.Lock()  # one sync at a time
 
 
@@ -23,10 +25,18 @@ def _status(**changes):
     db.put("status", {**db.get("status"), **changes})
 
 
+def _step(doing):
+    state.update(running=doing, progress=None)
+
+
+def _progress(done, total):
+    state["progress"] = (done, total)
+
+
 @contextmanager
 def _job(name):
     with _lock:
-        state["running"] = name
+        _step(f"starting the {name}")
         try:
             yield
             _status(error=None)
@@ -34,7 +44,7 @@ def _job(name):
             log.exception("%s failed", name)
             _status(error=f"{name} failed: {e}")
         finally:
-            state["running"] = None
+            _step(None)
 
 
 def mark_dirty():
@@ -66,8 +76,10 @@ def _refresh(login, playlist_url, guide_url):
     """Download the configured sources and bring the channel list up to date."""
     guide = []
     if guide_url:
+        _step("downloading the guide")
         tmp = db.UPSTREAM.with_suffix(".part")
-        size = ingest.fetch(guide_url, tmp)
+        size = ingest.fetch(guide_url, tmp, _progress)
+        _step("reading the guide")
         guide = list(xmltv.read_channels(tmp))
         if not guide:  # an error page or empty file must not replace a good cache
             raise ValueError("the guide address returned no <channel> elements, is it XMLTV?")
@@ -75,14 +87,16 @@ def _refresh(login, playlist_url, guide_url):
         db.set_epg_channels(guide)
         _status(upstream_bytes=size)
     if login:
+        _step("reading your channels from the provider")
         entries = list(xtream.read_channels(*login))
         if not entries:
             raise ValueError("the provider lists no live channels for this login")
         db.import_channels(entries, playlist=True)
     elif playlist_url:
+        _step("downloading the playlist from your provider")
         tmp = db.PLAYLIST.with_suffix(".download")
         try:
-            ingest.fetch(playlist_url, tmp)
+            ingest.fetch(playlist_url, tmp, _progress)
             entries = list(m3u.read_entries(tmp))
         finally:
             tmp.unlink(missing_ok=True)  # it holds the provider login; the database keeps what is needed
@@ -95,6 +109,7 @@ def _refresh(login, playlist_url, guide_url):
 
 
 def _build():
+    _step("publishing the new edition")
     db.put("dirty", False)  # edits landing from here on wait for the next sync
     rows = db.layout()
     guide = {}  # guide channels in player order; the first channel using an id sets its overrides
@@ -118,6 +133,7 @@ def _build():
     )
     log.info("published %d channels, %d with guide data, %d programmes", len(rows), len(guide), programmes)
     if publish.enabled() and db.OUTPUT.exists():
+        _step("uploading the guide to R2")
         try:
             publish.upload(db.OUTPUT)
         except Exception as e:  # the guide itself is published; say which half went wrong
@@ -126,10 +142,10 @@ def _build():
 
 def sync():
     """Fetch upstream, pick up new channels, and publish the playlist and guide."""
-    configured = sources()
-    if not any(configured):
-        return
     with _job("sync"):
+        configured = sources()
+        if not any(configured):
+            return
         try:
             _refresh(*configured)
         except Exception:
@@ -140,6 +156,8 @@ def sync():
 
 
 def sync_now():
+    # Said before the thread starts, so the editor's very next look already finds a sync under way.
+    state["running"] = state["running"] or "starting the sync"
     threading.Thread(target=sync, daemon=True).start()
 
 

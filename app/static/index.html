@@ -318,7 +318,7 @@ let current = null;           // the group being read
 let total = 0;                // channels in the whole line-up
 let guideIds = new Set();     // channel ids the upstream guide has programmes for
 let playlist = false;         // the line-up is playlist streams, not a guide on its own
-let wasRunning = null, lastBuilt, editionKey, viewersKey = "", settingsLoaded = false, loaded = false;
+let wasRunning = null, lastBuilt, editionKey, viewersKey = "", settingsLoaded = false, loaded = false, pollTimer;
 
 async function api(method, path, body) {
   // location.origin: a page opened as http://user:pass@host would otherwise make fetch throw
@@ -338,6 +338,10 @@ const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.crea
 const num = n => Number(n).toLocaleString();
 const mb = n => (n / 1048576).toFixed(n < 1048576 ? 2 : 1) + " MB";
 const sentence = s => s.charAt(0).toUpperCase() + s.slice(1).replace(/[.?!]$/, "");
+// The megabytes of a download in hand. They tick inside the edition line but are kept from screen readers,
+// which would otherwise read the whole sentence out again at every tick.
+const figures = el("span");
+figures.setAttribute("aria-hidden", "true");
 const motion = matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 150;
 function when(iso) {
   if (!iso) return "not yet";
@@ -365,8 +369,8 @@ async function refresh() {
   const st = s.status, edition = $("#edition");
   const configured = !!(s.settings.xtream_url || s.settings.playlist_url || s.settings.upstream_url);
   const standing = st.built_at ? ` Players still get the edition published ${when(st.built_at)}.` : "";
-  let text, stop = true, address = false;
-  if (s.running) text = "Stop press: fetching upstream and publishing";
+  let text, after = "", stop = true, address = false;
+  if (s.running) { text = `Stop press: ${s.running}`; after = `.${standing}`; }
   else if (st.error) {
     text = `${sentence(st.error)}.${standing}${s.dirty ? " You also have unpublished changes." : ""}`;
     address = /^sync failed/.test(st.error) && !/R2/.test(st.error);
@@ -378,10 +382,12 @@ async function refresh() {
     text = [`Published ${when(st.built_at)}`, `${num(st.channels)} channels`, `${num(st.programmes)} programmes`,
       st.output_bytes == null ? null : mb(st.output_bytes), `next sync ${when(s.next_sync)}`].filter(Boolean).join(" · ");
   }
-  if (editionKey !== text + address) {  // a live region: touch it only when it has something new to say
-    editionKey = text + address;
-    edition.replaceChildren(text, ...(address ? [" ", el("a", {href: "#source", textContent: "Check your details under Source"}), "."] : []));
+  if (editionKey !== text + after + address) {  // a live region: touch it only when it has something new to say
+    editionKey = text + after + address;
+    edition.replaceChildren(text, figures, after, ...(address ? [" ", el("a", {href: "#source", textContent: "Check your details under Source"}), "."] : []));
   }
+  const [done, total] = s.progress ?? [];
+  figures.textContent = done ? `, ${mb(done)}${total ? ` of ${mb(total)}` : " so far"}` : "";
   edition.classList.toggle("stop", stop);
   if (lastBuilt !== undefined && st.built_at !== lastBuilt) {  // a new edition landed: one flash of fresh ink
     edition.classList.remove("fresh"); void edition.offsetWidth; edition.classList.add("fresh");
@@ -451,7 +457,11 @@ function renderViewers(s) {
   $("#viewers").replaceChildren(...entries);
 }
 
-$("#syncBtn").onclick = () => api("POST", "/sync").then(refresh, fail);
+$("#syncBtn").onclick = e => {
+  e.target.disabled = true;  // answer the press at once; the edition line follows with what the sync is doing
+  e.target.textContent = "Syncing";
+  api("POST", "/sync").catch(fail).then(poll);
+};
 $("#settings").onsubmit = e => {
   e.preventDefault();
   const f = e.target.elements;
@@ -811,8 +821,12 @@ $("#removeGroup").onclick = () => {
   show();
 };
 
+// Look again every four seconds, and every second while a sync runs so its steps and figures keep up.
+function poll() {
+  return refresh().catch(fail).finally(() => { clearTimeout(pollTimer); pollTimer = setTimeout(poll, wasRunning ? 1000 : 4000); });
+}
 refresh().then(loadChannels).catch(fail);
-setInterval(() => refresh().catch(fail), 4000);
+pollTimer = setTimeout(poll, 4000);
 </script>
 </body>
 </html>

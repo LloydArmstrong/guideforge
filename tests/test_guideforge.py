@@ -8,6 +8,7 @@ import os
 import sys
 import tempfile
 import threading
+import time
 from functools import partial
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -20,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from fastapi.testclient import TestClient  # noqa: E402
 from lxml import etree  # noqa: E402
 
-from app import db, m3u, sync, transform, xtream  # noqa: E402
+from app import db, ingest, m3u, sync, transform, xtream  # noqa: E402
 from app.main import app  # noqa: E402
 
 WWW = Path(tempfile.mkdtemp())
@@ -103,8 +104,21 @@ def playlist():
 def test_guide_only():
     db.init()
     db.put("upstream_url", upstream("a.uk", "b.uk", "c.us"))
+    steps = []  # a sync says what it is doing, for the edition line
+    step, sync._step = sync._step, lambda doing: (steps.append(doing), step(doing))
     sync.sync()
+    sync._step = step
     assert db.get("status")["error"] is None, db.get("status")
+    assert steps == ["starting the sync", "downloading the guide", "reading the guide", "publishing the new edition", None]
+    seen = []  # ...and a download counts its bytes against the size the server announced
+    size = ingest.fetch(db.get("upstream_url"), WWW / "copy", lambda *at: seen.append(at))
+    assert seen[-1] == (size, size)
+    with sync._lock:  # pressing Sync now is answered at once, before the worker gets its turn
+        sync.sync_now()
+        assert sync.state["running"] == "starting the sync"
+    while sync.state["running"]:
+        time.sleep(0.01)
+    assert sync.state == {"running": None, "progress": None} and db.get("status")["error"] is None
     _, chans, progs = guide()
     assert chans == ["a.uk", "b.uk", "c.us"] and len(progs) == 6
     assert db.groups() == ["UK", "US"] and not db.PLAYLIST.exists()
