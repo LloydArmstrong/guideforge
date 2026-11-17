@@ -39,10 +39,10 @@ def _job(name):
         _step(f"starting the {name}")
         try:
             yield
-            _status(error=None)
+            _status(error=None, failed_at=None)
         except Exception as e:  # a failed run keeps what was published before
             log.exception("%s failed", name)
-            _status(error=f"{name} failed: {e}")
+            _status(error=f"{name} failed: {e}", failed_at=state["running"])  # the step it stopped on, for the sync dialog
         finally:
             _step(None)
 
@@ -150,7 +150,9 @@ def sync():
             _refresh(*configured)
         except Exception:
             if db.get("dirty"):  # a failed download must not hold the operator's edits back
+                doing = state["running"]
                 _build()
+                _step(doing)  # the failure is the download's, not this build's
             raise
         _build()
 
