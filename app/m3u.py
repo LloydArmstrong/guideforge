@@ -1,6 +1,6 @@
 """Streaming M3U parsing for provider playlists."""
 import re
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 
 from . import xmltv
 
@@ -8,12 +8,21 @@ _ATTR = re.compile(r'([\w-]+)="([^"]*)"')
 _OURS = {"tvg-id", "tvg-name", "tvg-logo", "tvg-chno", "group-title"}  # rewritten on output; the rest pass through
 _VOD = re.compile(r"/(movie|series)/|\.(mp4|mkv|avi|mov|flv|wmv)$", re.I)
 _XTREAM = re.compile(r"(?:/live)?/[^/]+/[^/]+/(\d+)(?:\.\w+)?")
+_XTREAM_LINE = re.compile(r"^https?://[^/\s]+(?:/live)?/([^/\s]+/[^/\s]+)/\d+(?:\.\w+)?(?:[?#]\S*)?$", re.M)  # _XTREAM, as a whole stream line
 
 
 def stream_key(url):
     """A stable id for a stream: the Xtream stream number where there is one, so it survives a password change."""
     xtream = _XTREAM.fullmatch(urlsplit(url).path)
     return xtream[1] if xtream else url
+
+
+def with_login(text, username, password):
+    """The playlist signed in as this login instead, wherever the operator's appears (catch-up addresses too)."""
+    operator = _XTREAM_LINE.search(text)  # every stream comes from one source, so the first one names its login
+    if not operator:
+        return text
+    return text.replace(f"/{operator[1]}/", f"/{quote(username, safe='')}/{quote(password, safe='')}/")
 
 
 def read_entries(path):

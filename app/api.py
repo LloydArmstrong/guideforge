@@ -1,4 +1,5 @@
 """Management API behind HTTP Basic auth, used by the web UI."""
+import contextlib
 import logging
 import os
 import secrets
@@ -49,6 +50,11 @@ class ChannelPatch(BaseModel):
     icon: str | None = None
     lcn: str | None = None
     tvg: str | None = None
+
+
+class ViewerLogin(BaseModel):
+    xtream_user: str = Field("", max_length=200)
+    xtream_pass: str = Field("", max_length=200)
 
 
 class GroupRename(BaseModel):
@@ -156,6 +162,18 @@ def rename_group(rename: GroupRename):
 @router.post("/tokens")
 def add_token(label: Annotated[str, Body(embed=True, min_length=1, max_length=80)]):
     db.add_token(label.strip())
+    return db.tokens()
+
+
+@router.put("/tokens/{token}/login")
+def set_token_login(token: str, login: ViewerLogin):
+    """A viewer's own provider login; both blank means they get the operator's."""
+    user, password = login.xtream_user.strip(), login.xtream_pass.strip()
+    if bool(user) != bool(password):
+        raise HTTPException(400, "A viewer's login needs both a username and a password, or neither")
+    db.set_token_login(token, user or None, password or None)
+    with contextlib.suppress(FileNotFoundError):  # not touch(): it would recreate a playlist a sync just removed
+        os.utime(db.PLAYLIST)  # a new mtime is a new ETag, so players holding the old login fetch it again
     return db.tokens()
 
 

@@ -312,6 +312,64 @@ def test_serving():
         assert r.text.splitlines()[0] == '#EXTM3U url-tvg="http://testserver/epg.xml.gz"'  # unchecked keys are not echoed
 
 
+def test_viewer_login():
+    old = ('#EXTM3U url-tvg="http://gf/u/k/epg.xml.gz"\n'
+           '#EXTINF:-1 tvg-logo="http://logo/a/b/1.png" catchup-source="http://prov:8080/timeshift/user/old/{duration}/{start}/103.ts",A\n'
+           "http://prov:8080/user/old/103\nhttp://prov:8080/live/user/old/101.ts\nhttp://other/stream.m3u8\n")
+    # everywhere the operator's login appears, catch-up addresses included
+    assert m3u.with_login(old, "new", "p@ss/1 %") == old.replace("user/old/", "new/p%40ss%2F1%20%25/")
+    assert m3u.with_login("http://prov:8080/live/user/old/104.ts?token=abc\n", "new", "x") == "http://prov:8080/live/new/x/104.ts?token=abc\n"
+
+    # an existing database gains the columns, and its viewers keep working without a login
+    # (test_serving revoked the default key, so "Old viewer" is the only one)
+    db.add_token("Old viewer")
+    with db.connect() as con:
+        con.execute("ALTER TABLE tokens DROP COLUMN xtream_user")
+        con.execute("ALTER TABLE tokens DROP COLUMN xtream_pass")
+    db.init()
+    assert [(t["label"], t["xtream_user"], t["xtream_pass"]) for t in db.tokens()] == [("Old viewer", None, None)]
+
+    http = TestClient(app)  # no `with`: test_serving already ran startup, and the scheduler is shut down
+    auth = ("admin", "pw")
+    for who in ("Mum", "Dad"):
+        http.post("/api/tokens", auth=auth, json={"label": who})
+    mum, dad = (next(t["token"] for t in db.tokens() if t["label"] == who) for who in ("Mum", "Dad"))
+    streams = lambda key: [l for l in http.get(f"/u/{key}/playlist.m3u").text.splitlines() if not l.startswith("#")]
+
+    before = http.get(f"/u/{mum}/playlist.m3u")
+    r = http.put(f"/api/tokens/{mum}/login", auth=auth, json={"xtream_user": " mum ", "xtream_pass": " pa/ss 2 "})
+    assert r.status_code == 200
+    assert [(t["xtream_user"], t["xtream_pass"]) for t in r.json() if t["token"] == mum] == [("mum", "pa/ss 2")]
+
+    # a player holding the old copy gets the new login, not a 304
+    r = http.get(f"/u/{mum}/playlist.m3u", headers={"If-None-Match": before.headers["etag"]})
+    assert r.status_code == 200
+    assert r.headers["cache-control"] == "private, no-cache"  # keyless access is on (test_serving), but this copy carries Mum's login
+    mine = streams(mum)
+    assert mine and all(s.startswith(url("live/mum/pa%2Fss%202/")) for s in mine)
+    assert all(s.startswith(url("live/user/pa%20ss/")) for s in streams(dad))  # no login: the operator's
+
+    assert http.put(f"/api/tokens/{mum}/login", auth=auth, json={"xtream_user": "mum", "xtream_pass": ""}).status_code == 400
+    assert http.put(f"/api/tokens/{mum}/login", auth=auth, json={"xtream_user": "", "xtream_pass": ""}).status_code == 200
+    assert streams(mum) == streams(dad)  # cleared: back to the operator's login
+
+    # a sync that removes the playlist just after the save looks for it must not leave an empty one behind
+    published, aside = db.PLAYLIST, db.PLAYLIST.with_suffix(".aside")
+    published.rename(aside)
+
+    class Racy(type(published)):
+        def exists(self, *args, **kwargs):
+            return True
+
+    db.PLAYLIST = Racy(published)
+    try:
+        http.put(f"/api/tokens/{mum}/login", auth=auth, json={"xtream_user": "mum", "xtream_pass": "x"})
+        assert not published.exists()
+    finally:
+        db.PLAYLIST = published
+        aside.rename(published)
+
+
 if __name__ == "__main__":
     server = HTTPServer(("127.0.0.1", 0), partial(Provider, directory=WWW))
     threading.Thread(target=server.serve_forever, daemon=True).start()
@@ -319,4 +377,5 @@ if __name__ == "__main__":
     test_playlist()
     test_xtream()
     test_serving()
+    test_viewer_login()
     print("ok")
