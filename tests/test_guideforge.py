@@ -162,6 +162,7 @@ def test_guide_only():
     sync.mark_dirty()
     sync.sync()
     assert "sync failed" in db.get("status")["error"] and not db.get("dirty")
+    assert db.get("status")["failed_at"] == "reading the guide"  # the guide, not the rescue build that followed
     assert guide()[0].find("channel[@id='d.fr']").findtext("display-name") == "France 2"
 
     assert transform.guess_group("x", "UK: BBC One") == "UK" and transform.guess_group("espn.us", "ESPN") == "US"
@@ -223,9 +224,10 @@ def test_xtream():
     db.put("xtream_pass", "wrong")
     sync.sync()
     assert "did not accept that username and password" in db.get("status")["error"]
+    assert db.get("status")["failed_at"] == "reading your channels from the provider"
     db.put("xtream_pass", "pa ss")
     sync.sync()
-    assert db.get("status")["error"] is None, db.get("status")
+    assert db.get("status")["error"] is None and db.get("status")["failed_at"] is None, db.get("status")
     rows = {c["id"]: c for c in db.channels()}
     # same stream ids, so the line-up built from the M3U link carries over; the new stream joins the end
     assert (rows["103"]["grp"], rows["103"]["name"], rows["102"]["tvg"]) == ("Favourites", "CNN", "zz.uk")

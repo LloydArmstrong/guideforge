@@ -61,6 +61,8 @@
   .btn.danger { border-color: var(--red); color: var(--red); }
   .btn.danger:hover { background: var(--red); color: #fff; }
   .btn:disabled { border-style: dashed; border-color: var(--blank); background: none; color: var(--ink-soft); cursor: default; translate: none; }
+  .btn.primary.busy { border-style: dashed; border-color: var(--blank); background: none; color: var(--ink-soft); }  /* a sync is running; pressing shows it */
+  .btn.primary.busy:hover { background: var(--paper-lit); }
   input[type=checkbox] { accent-color: var(--ink); width: 15px; height: 15px; margin: 0; cursor: pointer; }
   .field { width: 100%; padding: 7px 8px; border: 0; border-bottom: 1px solid var(--blank); background: var(--paper-lit); }
   .field:hover { border-bottom-color: var(--ink); }
@@ -164,6 +166,57 @@
   dt { color: var(--ink-soft); }
   dd { margin: 0; overflow-wrap: anywhere; }
 
+  /* ---- sync dialog: a page runs under the press roller while the steps tick off ---- */
+  #syncDlg { width: min(470px, calc(100% - 32px)); padding: 0; border: 1px solid var(--ink); border-top-width: 4px; background: var(--paper); color: var(--ink); box-shadow: 6px 6px 0 var(--rule); }
+  #syncDlg[open] { animation: rise .45s var(--out); }
+  #syncDlg::backdrop { background: color-mix(in srgb, var(--paper) 74%, transparent); }
+  .sync-top { display: flex; gap: 18px; padding: 16px 18px 14px; border-bottom: 1px solid var(--ink); }
+  .sync-title { flex: 1; min-width: 0; display: grid; gap: 4px; align-content: start; }
+  .kicker { display: flex; gap: .5em; font-stretch: 75%; font-weight: 700; font-size: .75rem; text-transform: uppercase; letter-spacing: .07em; color: var(--red); }
+  #syncDlg[data-phase=done] .kicker { color: var(--ink); }
+  #syncTime { margin-left: auto; color: var(--ink-soft); letter-spacing: .02em; }
+  #syncHead { font-size: 2.125rem; }
+  #syncSteps { list-style: none; margin: 0; padding: 4px 18px 8px; }
+  #syncSteps li { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--rule); color: var(--ink-soft); }
+  #syncSteps li:first-child { border-top: 0; }
+  #syncSteps i { width: 10px; height: 10px; border: 1px solid var(--blank); }
+  #syncSteps b { font-weight: 400; font-size: .8125rem; }
+  #syncSteps .ok { color: var(--ink); }
+  #syncSteps .ok i { background: var(--ink); border-color: var(--ink); }
+  #syncSteps .now { color: var(--ink); font-weight: 650; }
+  #syncSteps .now i { background: var(--red); border-color: var(--red); animation: blink 1s steps(2, start) infinite; }
+  #syncSteps .bad { color: var(--red); font-weight: 650; }
+  #syncSteps .bad i { background: var(--red); border-color: var(--red); }
+  #syncSteps .bad b { padding: 0 5px; background: var(--red); color: #fff; font-weight: 700; }
+  .bar { grid-column: 2 / -1; position: relative; height: 2px; background: var(--rule); overflow: hidden; }
+  #syncSteps li:not(.now) > .bar { display: none; }
+  .bar span { position: absolute; inset: 0 auto 0 0; background: var(--red); transition: width .9s linear; }  /* glides between the once-a-second looks */
+  .bar.ind span { width: 30%; animation: slide 1.1s ease-in-out infinite alternate; }
+  .sync-foot { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-top: 1px solid var(--ink); }
+  .sync-foot .note { flex: 1; font-size: .8125rem; }
+  .press { position: relative; flex: none; width: 78px; height: 100px; }
+  .proof { position: absolute; inset: 0; background: var(--paper-lit); border: 1px solid var(--ink); animation: press-feed 2.4s ease-in-out infinite; }
+  .proof::before, .proof::after { content: ""; position: absolute; inset: 7px; --c: var(--rule); --spot: var(--rule);  /* blind lines, then the same lines inked */
+    background:
+      linear-gradient(var(--spot), var(--spot)) 0 0 / 9px 9px no-repeat,
+      linear-gradient(var(--c), var(--c)) 12px 0 / calc(100% - 12px) 9px no-repeat,
+      repeating-linear-gradient(var(--c) 0 3px, transparent 3px 7px) 0 15px / calc(50% - 3px) calc(100% - 15px) no-repeat,
+      repeating-linear-gradient(var(--c) 0 3px, transparent 3px 7px) 100% 15px / calc(50% - 3px) calc(100% - 15px) no-repeat; }
+  .proof::after { --c: var(--ink); --spot: var(--red); animation: press-ink 2.4s ease-in-out infinite; }
+  .roller { position: absolute; left: -6px; right: -6px; top: calc(100% - 10px); height: 6px; background: var(--ink); animation: press-roll 2.4s ease-in-out infinite; }
+  .press:not(.running) *, .press:not(.running) ::after { animation: none; }
+  .press.failed .proof::after { clip-path: inset(0 0 52% 0); }
+  .press.failed .roller { top: 46%; }
+  .press.failed::after { content: "Held"; position: absolute; left: 50%; top: 58%; translate: -50% -50%; rotate: -14deg; padding: 0 6px; border: 2px solid var(--red); background: var(--paper-lit); color: var(--red);
+    font-stretch: 62%; font-weight: 800; font-size: 1.0625rem; text-transform: uppercase; }
+  @keyframes rise { from { opacity: 0; translate: 0 14px; } }
+  @keyframes blink { to { visibility: hidden; } }
+  @keyframes slide { from { left: 0; } to { left: 70%; } }
+  @keyframes press-feed { 0% { opacity: 0; translate: 10px 0; } 10%, 82% { opacity: 1; translate: 0; } 100% { opacity: 0; translate: -10px 0; } }
+  @keyframes press-ink { 0%, 12% { clip-path: inset(0 0 100% 0); } 76%, 100% { clip-path: inset(0); } }
+  @keyframes press-roll { 0%, 12% { top: 4px; } 76% { top: calc(100% - 10px); } 100% { top: 4px; } }
+  @media (max-width: 520px) { #syncHead { font-size: 1.75rem; } .press { width: 62px; height: 80px; } }
+
   @media (max-width: 1000px) {
     main { padding: 0 16px 48px; }
     .masthead h1 { font-size: 2rem; }
@@ -177,7 +230,7 @@
     .addr { grid-template-columns: 96px minmax(0, 1fr); }
     .addr .btn { grid-column: 2; justify-self: start; }
   }
-  @media (prefers-reduced-motion: reduce) { #edition.fresh { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { #edition.fresh, #syncDlg[open], #syncDlg *, #syncDlg ::after { animation: none; } }
 </style>
 </head>
 <body>
@@ -294,6 +347,23 @@
 <datalist id="groupNames"></datalist>
 <datalist id="guideIds"></datalist>
 
+<dialog id="syncDlg" aria-labelledby="syncHead">
+  <div class="sync-top">
+    <div class="press running" aria-hidden="true"><div class="proof"></div><div class="roller"></div></div>
+    <div class="sync-title">
+      <p class="kicker"><span id="syncKick"></span><span id="syncTime"></span></p>
+      <h2 id="syncHead" class="head"></h2>
+      <p id="syncSub" class="note"></p>
+    </div>
+  </div>
+  <ol id="syncSteps"></ol>
+  <form method="dialog" class="sync-foot">
+    <span id="syncNote" class="note"></span>
+    <button class="btn" autofocus>Close</button>
+    <button id="syncAgain" class="btn primary" type="button" hidden>Try again</button>
+  </form>
+</dialog>
+
 <template id="rowT">
   <li class="row">
     <button class="handle" type="button" title="Drag to move. Keyboard: arrow keys, Home, End." aria-label="Move this channel: drag, or press the arrow keys. Home and End jump to the top and bottom."></button>
@@ -320,7 +390,7 @@ let current = null;           // the group being read
 let total = 0;                // channels in the whole line-up
 let guideIds = new Set();     // channel ids the upstream guide has programmes for
 let playlist = false;         // the line-up is playlist streams, not a guide on its own
-let wasRunning = null, lastBuilt, editionKey, viewersKey = "", settingsLoaded = false, loaded = false, pollTimer;
+let wasRunning = null, lastBuilt, editionKey, viewersKey = "", settingsLoaded = false, loaded = false, pollTimer, lastState;
 
 async function api(method, path, body) {
   // location.origin: a page opened as http://user:pass@host would otherwise make fetch throw
@@ -367,8 +437,17 @@ route();
 
 // ---- edition line, sync record, viewers ----------------------------------
 async function refresh() {
-  const s = await api("GET", "/state");
+  const asked = performance.now(), s = await api("GET", "/state");
   const st = s.status, edition = $("#edition");
+  lastState = s;
+  if (s.running && !startedAt) { startedAt = Date.now(); fetched = {}; }
+  if (follow?.phase === "running") {
+    // A look sent before the press reached the server can still say nothing is running; only a later one may close the sync.
+    if (s.running) follow.seen = true;
+    else if (follow.seen || asked > follow.posted) Object.assign(follow, {phase: st.error ? "failed" : "done", took: Date.now() - startedAt});
+  }
+  if (!s.running && follow?.phase !== "running") startedAt = 0;
+  renderSync(s);
   const configured = !!(s.settings.xtream_url || s.settings.playlist_url || s.settings.upstream_url);
   const standing = st.built_at ? ` Players still get the edition published ${when(st.built_at)}.` : "";
   let text, after = "", stop = true, address = false;
@@ -395,8 +474,10 @@ async function refresh() {
     edition.classList.remove("fresh"); void edition.offsetWidth; edition.classList.add("fresh");
   }
   lastBuilt = st.built_at ?? null;
-  $("#syncBtn").disabled = !!s.running || !configured;
+  $("#syncBtn").disabled = !configured;
   $("#syncBtn").textContent = s.running ? "Syncing" : "Sync now";
+  $("#syncBtn").classList.toggle("busy", !!s.running);
+  $("#syncBtn").title = s.running ? "Show the sync under way" : "";
 
   $("#lastSync").textContent = when(st.last_sync);
   $("#nextSync").textContent = when(s.next_sync);
@@ -471,11 +552,76 @@ function renderViewers(s) {
   $("#viewers").replaceChildren(...entries);
 }
 
-$("#syncBtn").onclick = e => {
-  e.target.disabled = true;  // answer the press at once; the edition line follows with what the sync is doing
-  e.target.textContent = "Syncing";
-  api("POST", "/sync").catch(fail).then(poll);
-};
+// ---- sync dialog ---------------------------------------------------------
+// It follows the same looks as the edition line. Closing it leaves the sync running; Sync now brings it back.
+const dlg = $("#syncDlg");
+let follow = null;   // the sync the open dialog follows: {phase: running | done | failed, at, seen, posted, took, drawn}
+let startedAt = 0;   // when the sync under way began, as near as this page knows
+let fetched = {};    // step -> bytes of its download, where the size was known
+const elapsed = ms => { const t = Math.round(ms / 1000); return t < 60 ? `${t} s` : `${Math.floor(t / 60)} min ${t % 60} s`; };
+
+// The steps a sync takes with these settings, in the words app/sync.py's _step() reports them.
+function syncSteps(set, r2) {
+  const login = set.xtream_url && set.xtream_user && set.xtream_pass;
+  return [
+    ...(set.upstream_url ? ["downloading the guide", "reading the guide"] : []),
+    ...(login ? ["reading your channels from the provider"] : set.playlist_url ? ["downloading the playlist from your provider"] : []),
+    "publishing the new edition",
+    ...(r2 && set.upstream_url ? ["uploading the guide to R2"] : []),
+  ];
+}
+
+function renderSync(s) {
+  if (!follow || !s) return;
+  const st = s.status, phase = follow.phase, steps = syncSteps(s.settings, s.r2_url), [done, total] = s.progress ?? [];
+  if (steps.includes(s.running)) follow.at = steps.indexOf(s.running);  // the last step seen is where a failure is marked
+  if (s.running && total) fetched[s.running] = total;  // a finished download is its whole size; the last look may have caught it short
+  // a failure is marked on the step the server says it stopped on; one the looks never caught still gets its mark
+  const list = $("#syncSteps"), cur = phase === "failed" ? (steps.includes(st.failed_at) ? steps.indexOf(st.failed_at) : Math.max(follow.at, 0)) : follow.at;
+  if (list.dataset.key !== steps.join()) {
+    list.dataset.key = steps.join();
+    list.replaceChildren(...steps.map(step => el("li", {}, el("i"), el("span", {textContent: sentence(step)}), el("b"), el("span", {className: "bar"}, el("span")))));
+  }
+  [...list.children].forEach((li, i) => {
+    const state = phase === "done" || i < cur ? "ok" : i > cur ? "" : phase === "failed" ? "bad" : "now", step = steps[i];
+    li.className = state;
+    $("b", li).textContent = state === "now" && done ? `${mb(done)}${total ? ` of ${mb(total)}` : " so far"}`
+      : state === "ok" && fetched[step] ? mb(fetched[step]) : state === "bad" ? "Stopped" : "";
+    $(".bar", li).classList.toggle("ind", !(state === "now" && total));
+    $(".bar span", li).style.width = state === "now" && total ? `${(done / total) * 100}%` : "";
+  });
+  $("#syncTime").textContent = elapsed(phase === "running" ? Date.now() - startedAt : follow.took);
+  if (follow.drawn === phase) return;  // the rest changes only with the phase, so focus and links stay put
+  follow.drawn = phase;
+  $(".press", dlg).className = "press " + phase;
+  dlg.dataset.phase = phase;
+  $("#syncKick").textContent = {running: "Stop press", done: "Fresh off the press", failed: "Press held"}[phase];
+  $("#syncHead").textContent = {running: "Syncing", done: "Edition published", failed: "Sync stopped"}[phase];
+  const standing = st.built_at ? `Players ${phase === "failed" ? "still get" : "keep"} the edition published ${when(st.built_at)}` : "";
+  if (phase === "running") $("#syncSub").textContent = standing ? `${standing} until this one is out.` : "Players get the first edition when this finishes.";
+  else if (phase === "done") $("#syncSub").textContent = [when(st.built_at), `${num(st.channels)} channels`, `${num(st.guide_channels)} with guide data`,
+    `${num(st.programmes)} programmes`, st.output_bytes == null ? null : mb(st.output_bytes)].filter(Boolean).join(" · ");
+  else $("#syncSub").replaceChildren(el("span", {className: "stop", textContent: sentence(st.error.replace(/^sync failed: /, "")) + "."}), standing && ` ${standing}.`,
+    ...(/^sync failed/.test(st.error) && !/R2/.test(st.error) ? [" ", el("a", {href: "#source", textContent: "Check your details under Source", onclick: () => dlg.close()}), "."] : []));
+  $("#syncNote").textContent = phase === "running" ? "The sync carries on if you close this." : phase === "done" ? `Next sync ${when(s.next_sync)}` : "";
+  const close = $(".sync-foot .btn", dlg);
+  close.textContent = phase === "done" ? "Done" : "Close";
+  close.classList.toggle("primary", phase === "done");
+  $("#syncAgain").hidden = phase !== "failed";
+}
+
+// Pressing Sync now starts a sync, or shows the one already running (a scheduled one, say).
+function startSync() {
+  const running = !!lastState?.running;
+  follow = {phase: "running", at: -1, seen: running, posted: running ? 0 : Infinity, drawn: null};
+  if (!running) { startedAt = Date.now(); fetched = {}; $("#syncBtn").textContent = "Syncing"; }
+  renderSync(lastState);
+  if (!dlg.open) dlg.showModal();
+  if (!running) api("POST", "/sync").then(() => { if (follow) follow.posted = performance.now(); }, e => { dlg.close(); fail(e); }).then(poll);
+}
+$("#syncBtn").onclick = startSync;
+$("#syncAgain").onclick = startSync;
+dlg.onclose = () => follow = null;
 $("#settings").onsubmit = e => {
   e.preventDefault();
   const f = e.target.elements;
