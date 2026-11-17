@@ -5,7 +5,7 @@ from email.utils import formatdate
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse, Response, StreamingResponse
 
-from . import db
+from . import db, m3u
 
 router = APIRouter()
 METHODS = ["GET", "HEAD"]  # some players probe with HEAD first
@@ -80,7 +80,11 @@ def playlist(request: Request, slug: str | None = None, key: str | None = None):
     base = db.get("public_url") or str(request.base_url).rstrip("/")
     mine = f"/u/{key}" if key and db.token_exists(key) else ""  # never echo an unchecked path segment
     guide = f' url-tvg="{base}{mine}/epg.xml.gz"' if db.OUTPUT.exists() else ""
-    body = f"#EXTM3U{guide}\n".encode() + db.PLAYLIST.read_bytes()
+    body = db.PLAYLIST.read_text(encoding="utf-8")
+    if login := key and db.token_login(key):  # this viewer's own subscription instead of the operator's
+        body = m3u.with_login(body, *login)
+        headers["Cache-Control"] = "private, no-cache"  # theirs alone, and a changed login must not wait out a cache
+    body = f"#EXTM3U{guide}\n{body}".encode()
     if "gzip" in request.headers.get("accept-encoding", ""):
         body, headers["Content-Encoding"] = gzip.compress(body, 5), "gzip"
     return Response(body, media_type="audio/x-mpegurl", headers=headers)

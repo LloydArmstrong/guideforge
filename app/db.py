@@ -32,7 +32,9 @@ CREATE TABLE IF NOT EXISTS groups (name TEXT PRIMARY KEY, position INTEGER NOT N
 CREATE TABLE IF NOT EXISTS epg_channels (id TEXT PRIMARY KEY, name TEXT, xml TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS epg_channels_lower ON epg_channels (lower(id));
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS tokens (token TEXT PRIMARY KEY, label TEXT NOT NULL, created TEXT NOT NULL);
+-- A viewer's own provider login, swapped into their playlist; NULL means the operator's.
+CREATE TABLE IF NOT EXISTS tokens (token TEXT PRIMARY KEY, label TEXT NOT NULL, created TEXT NOT NULL,
+                                   xtream_user TEXT, xtream_pass TEXT);
 """
 
 # A database from before playlists existed: its channels are guide-only, keyed by their XMLTV id.
@@ -89,6 +91,8 @@ def init():
         if any(column[1] == "xml" for column in con.execute("PRAGMA table_info(channels)")):
             con.executescript(MIGRATE_V1)
         con.executescript(SCHEMA)
+        if not any(column[1] == "xtream_user" for column in con.execute("PRAGMA table_info(tokens)")):
+            con.executescript("ALTER TABLE tokens ADD COLUMN xtream_user TEXT; ALTER TABLE tokens ADD COLUMN xtream_pass TEXT;")
         _ensure_groups(con, [r[0] for r in con.execute("SELECT grp FROM channels ORDER BY position")])
     if fresh:  # feeds are key-protected out of the box, so ship one working key
         add_token("default")
@@ -228,12 +232,24 @@ def epg_channels():
 
 def tokens():
     with connect() as con:
-        return [dict(r) for r in con.execute("SELECT token, label, created FROM tokens ORDER BY created, label")]
+        return [dict(r) for r in con.execute("SELECT token, label, created, xtream_user, xtream_pass FROM tokens ORDER BY created, label")]
 
 
 def add_token(label):
     with connect() as con:
-        con.execute("INSERT INTO tokens VALUES (?, ?, ?)", (secrets.token_urlsafe(16), label, now()))
+        con.execute("INSERT INTO tokens (token, label, created) VALUES (?, ?, ?)", (secrets.token_urlsafe(16), label, now()))
+
+
+def set_token_login(token, username, password):
+    with connect() as con:
+        con.execute("UPDATE tokens SET xtream_user = ?, xtream_pass = ? WHERE token = ?", (username, password, token))
+
+
+def token_login(token):
+    """(username, password) when this viewer has a provider login of their own, else None."""
+    with connect() as con:
+        row = con.execute("SELECT xtream_user, xtream_pass FROM tokens WHERE token = ?", (token,)).fetchone()
+    return tuple(row) if row and all(row) else None
 
 
 def delete_token(token):

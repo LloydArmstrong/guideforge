@@ -26,7 +26,7 @@ A small self-hosted app that sits between your IPTV provider and your players. P
 
 > [!IMPORTANT]
 >
-> **Everyone shares your provider login.** The playlist contains your provider's stream addresses, login included. Give it only to people you would give that login to; the provider's connection limit applies across all of them.
+> **Each viewer can have their own provider login.** The playlist contains your provider's stream addresses, login included. Set a viewer's own username and password under **Viewers** and their playlist carries that login instead of yours. A viewer without one gets yours, so give those addresses only to people you would give your login to. Each login's connection limit applies to the players using it.
 
 ## Getting Started
 
@@ -84,7 +84,7 @@ If a download fails during a sync, your waiting edits are still published from t
 
 | URL | What a player gets |
 | --- | --- |
-| `/u/<key>/playlist.m3u` | The edited playlist. Its first line carries the viewer's guide address. |
+| `/u/<key>/playlist.m3u` | The edited playlist, with the viewer's own provider login when one is set. Its first line carries the viewer's guide address. |
 | `/u/<key>/epg.xml.gz` | The gzipped guide, trimmed to the channels you publish. |
 | `/u/<key>/epg.xml` | The guide as XML, sent with `Content-Encoding: gzip` when the player accepts it. |
 | `/playlist.m3u?key=<key>`, `/epg.xml.gz?key=<key>` | The same, with the key as a query parameter. |

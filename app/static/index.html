@@ -140,6 +140,8 @@
   .viewer { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 8px 28px; margin-top: 22px; padding-top: 10px; border-top: 3px solid var(--ink); }
   .viewer h3 { font-size: 1.125rem; overflow-wrap: anywhere; }
   .viewer .who { display: grid; gap: 10px; justify-items: start; align-content: start; }
+  .viewer .login { width: 100%; gap: 10px; }
+  .viewer .login .btn { justify-self: start; }
   .addr { display: grid; grid-template-columns: 104px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 6px 0; border-top: 1px solid var(--rule); }
   .addr:first-child { border-top: 0; padding-top: 0; }
   .addr .field { font: 0.8125rem ui-monospace, "SF Mono", Menlo, monospace; }
@@ -240,7 +242,7 @@
       <input class="field" type="text" name="label" placeholder="Name a viewer or device, e.g. Dad's Fire Stick" aria-label="New viewer or device name" maxlength="80" required>
       <button class="btn primary">Add viewer</button>
     </form>
-    <p class="note" style="margin-top:18px">The playlist hands a viewer your provider's stream addresses, login included, so give it only to people you would give that login to. Guide addresses end in <code>.xml.gz</code> because some players need that ending; swap it for <code>.xml</code> for plain XML. <code>?key=KEY</code> on <code>/playlist.m3u</code> or <code>/epg.xml.gz</code> works as well.</p>
+    <p class="note" style="margin-top:18px">A viewer's playlist carries a provider login in its stream addresses: their own if you set one above, otherwise yours. Give a playlist without its own login only to people you would give your login to. Guide addresses end in <code>.xml.gz</code> because some players need that ending; swap it for <code>.xml</code> for plain XML. <code>?key=KEY</code> on <code>/playlist.m3u</code> or <code>/epg.xml.gz</code> works as well.</p>
   </section>
 
   <section id="view-source" class="view" hidden>
@@ -443,8 +445,20 @@ function renderViewers(s) {
   const entries = [];
   if (s.settings.public_access)
     entries.push(viewer("Anyone", lines("Anyone", ""), el("p", {className: "note", textContent: "Keyless access is on. Turn it off under Source."})));
+  // a viewer's own provider login, swapped into their playlist; blank means yours
+  const login = t => {
+    const field = (name, label) => el("label", {}, label,
+      el("input", {className: "field", type: "text", name, value: t[name] || "", autocomplete: "off", spellcheck: false}));
+    return el("form", {className: "stack login", onsubmit(e) {
+      e.preventDefault();
+      const f = e.target.elements;
+      api("PUT", "/tokens/" + encodeURIComponent(t.token) + "/login", {xtream_user: f.xtream_user.value, xtream_pass: f.xtream_pass.value}).then(refresh, fail);
+    }}, field("xtream_user", "Provider username"), field("xtream_pass", "Provider password"),
+      el("small", {textContent: "Their own provider login. Leave both blank to use yours."}),
+      el("button", {className: "btn", textContent: "Save login"}));
+  };
   for (const t of s.tokens)
-    entries.push(viewer(t.label, lines(t.label, "/u/" + t.token),
+    entries.push(viewer(t.label, lines(t.label, "/u/" + t.token), login(t),
       el("button", {className: "btn danger", type: "button", textContent: "Revoke", onclick() {
         if (confirm(`Revoke ${t.label}? Their addresses stop working straight away.`))
           api("DELETE", "/tokens/" + encodeURIComponent(t.token)).then(refresh, fail);
